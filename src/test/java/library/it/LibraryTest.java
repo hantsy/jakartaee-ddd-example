@@ -63,7 +63,7 @@ public class LibraryTest {
                 .asFile();
         WebArchive war = ShrinkWrap.create(WebArchive.class)
                 .addAsLibraries(extraJars)
-                .addPackages(true, "library")
+                .addPackages(true, "library.common", "library.lending", "library.catalog")
                 .addAsManifestResource("test-persistence.xml", "persistence.xml")
                 .addAsManifestResource("test-beans.xml", "beans.xml");
         LOGGER.log(Level.INFO, war.toString(true));
