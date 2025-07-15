@@ -9,7 +9,7 @@ This Library example demonstrates how to implement a modular DDD application usi
 > [!WARNING]
 > This project is still under development. Jakarta Data support is not available in GlassFish 8.0.0-M12, and I also encountered some issues when testing on WildFly 37.0.0.Beta1 preview.
 
-## Prequisistes
+## Prerequisites
 
 Assume you have installed the following software:
 * Java 21
@@ -25,7 +25,7 @@ Clone the source code via:
 git clone https://github.com/hantsy/jakartaee-ddd-example
 ```
 
-Build the project:
+Enter the project root folder and run the following command to build the project:
 
 ```bash
 mvn clean package
