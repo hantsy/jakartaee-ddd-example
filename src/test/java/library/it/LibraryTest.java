@@ -120,7 +120,7 @@ public class LibraryTest {
     public void testLibraryCrud() throws Exception {
         withTx(() -> {
             // Add a new Book
-            Book book = new Book("Effective Java", new Isbn("978-0134685991"));
+            Book book = new Book("Effective Java", new Isbn("9780134685991"));
             bookRepository.save(book);
 
             // Add some copies of the book
