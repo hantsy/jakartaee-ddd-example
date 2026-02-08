@@ -133,46 +133,51 @@ public class LibraryTest {
 
         UserId userId = new UserId();
 
-        // verify all copies
-        var allCopies = copyRepository.findAll().toList();
-        assertThat(allCopies.size()).isEqualTo(2);
+        withTx(() -> {
+            // verify all copies
+            var allCopies = copyRepository.findAll().toList();
+            assertThat(allCopies.size()).isEqualTo(2);
+        });
 
         withTx(() -> {
             // Rent a book
             rentBookUseCase.execute(new library.lending.domain.CopyId(copyId.id()), userId);
         });
 
-        // Verify that the book is NOT available
-        await().atMost(5000, TimeUnit.MILLISECONDS).untilAsserted(() -> {
-            var copyOptional = copyRepository.findById(copyId);
-            assertThat(copyOptional).isPresent();
-            assertThat(copyOptional.get().isAvailable()).isFalse();
+        withTx(() -> {
+            // Verify that the book is NOT available
+            await().atMost(5000, TimeUnit.MILLISECONDS).untilAsserted(() -> {
+                var copyOptional = copyRepository.findById(copyId);
+                assertThat(copyOptional).isPresent();
+                assertThat(copyOptional.get().isAvailable()).isFalse();
+            });
         });
-
 
         withTx(() -> {
             // rent again should throw exception
             assertThrows(Exception.class, () -> rentBookUseCase.execute(new library.lending.domain.CopyId(copyId.id()), userId));
         });
 
-        // verify ONLY one loan record
-        var allLoans = loanRepository.findAll().toList();
-        assertThat(allLoans.size()).isEqualTo(1);
-
-        // Retrieve Loan
-        Loan loan = loanRepository.findByIdOrThrow(allLoans.getFirst().id()); // Update this to the actual LoanID
-        assertThat(loan.copyId().id()).isEqualTo(copyId.id());
-
-        // Return the book
         withTx(() -> {
+            // verify ONLY one loan record
+            var allLoans = loanRepository.findAll().toList();
+            assertThat(allLoans.size()).isEqualTo(1);
+
+            // Retrieve Loan
+            Loan loan = loanRepository.findByIdOrThrow(allLoans.getFirst().id()); // Update this to the actual LoanID
+            assertThat(loan.copyId().id()).isEqualTo(copyId.id());
+
+            // Return the book
             returnBookUseCase.execute(loan.id());
         });
 
-        // Verify that the book is now available
-        await().atMost(5000, TimeUnit.MILLISECONDS).untilAsserted(() -> {
-            var returnedCopyOptional = copyRepository.findById(copyId);
-            assertThat(returnedCopyOptional).isPresent();
-            assertThat(returnedCopyOptional.get().isAvailable()).isTrue();
+        withTx(() -> {
+            // Verify that the book is now available
+            await().atMost(5000, TimeUnit.MILLISECONDS).untilAsserted(() -> {
+                var returnedCopyOptional = copyRepository.findById(copyId);
+                assertThat(returnedCopyOptional).isPresent();
+                assertThat(returnedCopyOptional.get().isAvailable()).isTrue();
+            });
         });
     }
 }
