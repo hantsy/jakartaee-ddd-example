@@ -7,7 +7,6 @@ import library.lending.domain.Loan;
 import library.lending.domain.LoanClosed;
 import library.lending.domain.LoanId;
 import library.lending.domain.LoanRepository;
-import org.eclipse.persistence.platform.database.oracle.plsql.PLSQLStoredFunctionCall;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +32,6 @@ public class ReturnBookUseCase {
         loan.returned();
 
         LOGGER.log(Level.INFO, "firing returned event for loan with id = " + loanId);
-        loanClosedEvent.fireAsync(new LoanClosed(loan.copyId()));
+        loanClosedEvent.fire(new LoanClosed(loan.copyId()));
     }
 }

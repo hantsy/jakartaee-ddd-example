@@ -28,6 +28,6 @@ public class RentBookUseCase {
         loanRepository.save(new Loan(copyId, userId, loanRepository));
 
         LOGGER.log(Level.INFO, "firing LoanCreated with copy id = " + copyId);
-        loanCreatedEvent.fireAsync(new LoanCreated(copyId));
+        loanCreatedEvent.fire(new LoanCreated(copyId));
     }
 }

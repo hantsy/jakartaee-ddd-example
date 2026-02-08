@@ -162,10 +162,9 @@ public class LibraryTest {
 
             // Verify that the book is now available
             await().atMost(5000, TimeUnit.MILLISECONDS).untilAsserted(() -> {
-                copyRepository.findById(new library.catalog.domain.CopyId(loan.copyId().id())).ifPresent(
-                        copy -> assertThat(copy.isAvailable()).isTrue()
-                );
-
+                var returnedCopyOptional = copyRepository.findById(new library.catalog.domain.CopyId(loan.copyId().id()));
+                assertThat(returnedCopyOptional).isPresent();
+                assertThat(returnedCopyOptional.get().isAvailable()).isTrue();
             });
         });
     }

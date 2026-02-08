@@ -1,7 +1,7 @@
 package library.catalog.application;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.ObservesAsync;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import library.catalog.domain.Copy;
 import library.catalog.domain.CopyId;
@@ -25,7 +25,7 @@ public class DomainEventListener {
         this.copyRepository = copyRepository;
     }
 
-    public void onLoanCreated(@ObservesAsync LoanCreated event) {
+    public void onLoanCreated(@Observes LoanCreated event) {
         LOGGER.log(Level.INFO, "handling LoanCreated:{0}", new Object[]{event});
         Copy copy = copyRepository.findById(new CopyId(event.copyId().id())).orElseThrow();
         copy.makeUnavailable();
@@ -33,7 +33,7 @@ public class DomainEventListener {
     }
 
 
-    public void onLoanClosed(@ObservesAsync LoanClosed event) {
+    public void onLoanClosed(@Observes LoanClosed event) {
         LOGGER.log(Level.INFO, "handling LoanClosed:{0}", new Object[]{event});
         Copy copy = copyRepository.findById(new CopyId(event.copyId().id())).orElseThrow();
         copy.makeAvailable();
