@@ -7,7 +7,7 @@
 This Library example demonstrates how to implement a modular DDD application using the latest Jakarta EE technologies, particularly with **Jakarta Data** to implement the `Repository` pattern, as described in Eric's book.
 
 > [!WARNING]
-> This project is still under development. Jakarta Data support is not available in GlassFish 8.0.0-M12, and I also encountered some issues when testing on WildFly 37.0.0.Beta1 preview.
+> This project is still under development. There is an issue with GlassFish 8.0.0, see [glassfish#25922](https://github.com/eclipse-ee4j/glassfish/issues/25922)
 
 ## Prerequisites
 
