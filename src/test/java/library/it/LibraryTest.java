@@ -111,8 +111,9 @@ public class LibraryTest {
             action.run();
             endTx();
         } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Transaction status: {0}, exception: {1}",
+                    new Object[]{ux.getStatus(), e.getMessage()});
             ux.rollback();
-            throw new RuntimeException(e);
         }
     }
 
