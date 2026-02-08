@@ -1,8 +1,11 @@
 package library.catalog.domain;
 
+import jakarta.persistence.Embeddable;
+
 import java.util.Objects;
 import java.util.UUID;
 
+@Embeddable
 public record CopyId(UUID id) {
 
     public CopyId {

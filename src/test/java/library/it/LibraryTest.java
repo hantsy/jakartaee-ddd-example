@@ -30,13 +30,11 @@ import library.lending.domain.Loan;
 import library.lending.domain.LoanRepository;
 import library.lending.domain.UserId;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.junit5.ArquillianExtension;
+import org.jboss.arquillian.junit5.container.annotation.ArquillianTest;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -47,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ExtendWith(ArquillianExtension.class)
+@ArquillianTest
 public class LibraryTest {
 
     private final static Logger LOGGER = Logger.getLogger(LibraryTest.class.getName());
@@ -61,11 +59,11 @@ public class LibraryTest {
                 .resolve("org.assertj:assertj-core", "org.awaitility:awaitility")
                 .withTransitivity()
                 .asFile();
-        WebArchive war = ShrinkWrap.create(WebArchive.class)
+        WebArchive war = ShrinkWrap.create(WebArchive.class, "LibraryTest.war")
                 .addAsLibraries(extraJars)
                 .addPackages(true, "library.common", "library.lending", "library.catalog")
-                .addAsManifestResource("test-persistence.xml", "persistence.xml")
-                .addAsManifestResource("test-beans.xml", "beans.xml");
+                .addAsResource("test-persistence.xml", "/META-INF/persistence.xml")
+                .addAsWebInfResource("test-beans.xml", "beans.xml");
         LOGGER.log(Level.INFO, war.toString(true));
         return war;
     }
