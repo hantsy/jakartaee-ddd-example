@@ -118,13 +118,14 @@ public class LibraryTest {
 
     @Test
     public void testLibraryCrud() throws Exception {
+        CopyId copyId = new CopyId();
         withTx(() -> {
             // Add a new Book
             Book book = new Book("Effective Java", new Isbn("9780134685991"));
             bookRepository.save(book);
 
             // Add some copies of the book
-            Copy copy1 = new Copy(book.getId(), new BarCode("BC001"));
+            Copy copy1 = new Copy(copyId, book.getId(), new BarCode("BC001"));
             Copy copy2 = new Copy(book.getId(), new BarCode("BC002"));
             copyRepository.save(copy1);
             copyRepository.save(copy2);
@@ -136,18 +137,19 @@ public class LibraryTest {
             var allCopies = copyRepository.findAll().toList();
             assertThat(allCopies.size()).isEqualTo(2);
             // Rent a book
-            CopyId copyId = allCopies.getFirst().id();
             rentBookUseCase.execute(new library.lending.domain.CopyId(copyId.id()), userId);
 
             // Verify that if the book copy available
             await().atMost(5000, TimeUnit.MILLISECONDS).untilAsserted(() -> {
-                copyRepository.findById(copyId).ifPresent(
-                        copy -> assertThat(copy.isAvailable()).isFalse()
-                );
-
-                // rent again should throw exception
-                assertThrows(Exception.class, () -> rentBookUseCase.execute(new library.lending.domain.CopyId(copyId.id()), userId));
+                var copyOptional = copyRepository.findById(copyId);
+                assertThat(copyOptional).isPresent();
+                assertThat(copyOptional.get().isAvailable()).isFalse();
             });
+        });
+
+        withTx(() -> {
+            // rent again should throw exception
+            assertThrows(Exception.class, () -> rentBookUseCase.execute(new library.lending.domain.CopyId(copyId.id()), userId));
         });
 
         withTx(() -> {

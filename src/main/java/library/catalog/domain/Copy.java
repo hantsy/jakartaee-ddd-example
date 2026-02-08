@@ -22,6 +22,16 @@ public class Copy {
         return this.id;
     }
 
+    public Copy(CopyId copyId, BookId bookId, BarCode barCode) {
+        Objects.requireNonNull(copyId, "copyId must not be null");
+        Objects.requireNonNull(bookId, "bookId must not be null");
+        Objects.requireNonNull(barCode, "barCode must not be null");
+        this.id = copyId;
+        this.bookId = bookId;
+        this.barCode = barCode;
+        this.available = true;
+    }
+
     public Copy(BookId bookId, BarCode barCode) {
         Objects.requireNonNull(bookId, "bookId must not be null");
         Objects.requireNonNull(barCode, "barCode must not be null");
