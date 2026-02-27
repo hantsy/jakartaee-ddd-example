@@ -57,7 +57,7 @@
         <arquillian-glassfish.version>7.0.14</arquillian-glassfish.version>
 
         <!-- WildFly -->
-        <wildfly.version>39.0.0.Final</wildfly.version>
+        <wildfly.version>39.0.1.Final</wildfly.version>
         <wildfly-maven-plugin.version>5.1.5.Final</wildfly-maven-plugin.version>
         <wildfly-arquillian.version>5.1.0.Final</wildfly-arquillian.version>
         <resteasy.version>7.0.1.Final</resteasy.version>
@@ -648,26 +648,6 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
-        </repository>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Sonatype Nexus Staging</name>
-            <url>https://jakarta.oss.sonatype.org/content/repositories/staging/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>payara-nexus</id>
-            <name>Payara Nexus Artifacts</name>
-            <url>https://nexus.payara.fish/repository/payara-artifacts/</url>
-        </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 </project>

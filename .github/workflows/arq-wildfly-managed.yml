@@ -1,4 +1,4 @@
-name: Integration Tests with WildFly
+name: arq-wildfly-managed
 
 on:
   push:
@@ -14,8 +14,8 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: maven
+        java-version: "21"
+        distribution: "temurin"
+        cache: "maven"
     - name: Run Tests on Wildfly
       run: mvn -B -q clean verify -Parq-wildfly-managed
