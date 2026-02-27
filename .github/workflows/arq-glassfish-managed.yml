@@ -1,4 +1,4 @@
-name: Integration Tests with GlassFish
+name: arq-glassfish-managed
 
 on:
   push:
@@ -14,13 +14,13 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: maven
+        java-version: "21"
+        distribution: "temurin"
+        cache: "maven"
     - name: Run Tests on Glassfish
       run: mvn -B -q clean verify -Parq-glassfish-managed
     - uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: glassfish-server-log
-        path: data/target/glassfish*/glassfish/domains/domain1/logs/server.log  
+        path: target/glassfish*/glassfish/domains/domain1/logs/server.log

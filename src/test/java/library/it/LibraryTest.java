@@ -132,14 +132,13 @@ public class LibraryTest {
             copyRepository.save(copy2);
         });
 
-        UserId userId = new UserId();
-
         withTx(() -> {
             // verify all copies
             var allCopies = copyRepository.findAll().toList();
             assertThat(allCopies.size()).isEqualTo(2);
         });
 
+        UserId userId = new UserId();
         withTx(() -> {
             // Rent a book
             rentBookUseCase.execute(new library.lending.domain.CopyId(copyId.id()), userId);
