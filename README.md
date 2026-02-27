@@ -1,8 +1,8 @@
 # JakartaEE DDD Examples
 
-[![Build](https://github.com/hantsy/jakartaee-ddd-example/actions/workflows/build.yml/badge.svg)](https://github.com/hantsy/jakartaee-ddd-example/actions/workflows/build.yml) 
-[![Integration Tests with GlassFish](https://github.com/hantsy/jakartaee-ddd-example/actions/workflows/it-with-glassfish.yml/badge.svg)](https://github.com/hantsy/jakartaee-ddd-example/actions/workflows/it-with-glassfish.yml)
-[![Integration Tests with WildFly](https://github.com/hantsy/jakartaee-ddd-example/actions/workflows/it-wtih-wildfly.yml/badge.svg)](https://github.com/hantsy/jakartaee-ddd-example/actions/workflows/it-wtih-wildfly.yml)
+[![build](https://github.com/hantsy/jakartaee-ddd-example/actions/workflows/build.yml/badge.svg)](https://github.com/hantsy/jakartaee-ddd-example/actions/workflows/build.yml) 
+[![arq-glassfish-managed](https://github.com/hantsy/jakartaee-ddd-example/actions/workflows/arq-glassfish-managed.yml/badge.svg)](https://github.com/hantsy/jakartaee-ddd-example/actions/workflows/arq-glassfish-managed.yml)
+[![arq-wildfly-managed](https://github.com/hantsy/jakartaee-ddd-example/actions/workflows/arq-wildfly-managed.yml/badge.svg)](https://github.com/hantsy/jakartaee-ddd-example/actions/workflows/arq-wildfly-managed.yml)
 
 This Library example demonstrates how to implement a modular DDD application using the latest Jakarta EE technologies, particularly with **Jakarta Data** to implement the `Repository` pattern, as described in Eric's book.
 
