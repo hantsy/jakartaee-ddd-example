@@ -12,7 +12,8 @@ public record CopyId(UUID id) {
         Objects.requireNonNull(id, "id must not be null");
     }
 
-    public CopyId() {
-        this(UUID.randomUUID());
-    }
+// In the lending domain, CopyId should always be copied from the catalog CopyID.
+//    public CopyId() {
+//        this(UUID.randomUUID());
+//    }
 }
