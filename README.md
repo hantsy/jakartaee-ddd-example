@@ -6,7 +6,7 @@
 
 This Library example demonstrates how to implement a modular DDD application using the latest Jakarta EE technologies, particularly with **Jakarta Data** to implement the `Repository` pattern, as described in Eric's book.
 
-The idea is from [Spring IO 2024 Talk: Implementing Domain Driven Design with Spring](https://www.youtube.com/watch?v=VGhg6Tfxb60) by [Maciej Walkowiak](https://github.com/maciejwalkowiak). I reimplement it in the Jakarta EE specification based on [the original sample code](https://github.com/maciejwalkowiak/implementing-ddd-with-spring-talk).
+The idea is from [Spring IO 2024 Talk: Implementing Domain Driven Design with Spring](https://www.youtube.com/watch?v=VGhg6Tfxb60) by [Maciej Walkowiak](https://github.com/maciejwalkowiak). I reimplemented it using the latest Jakarta EE 11 specification, based on [the original sample code](https://github.com/maciejwalkowiak/implementing-ddd-with-spring-talk).
 
 > [!WARNING]
 > This project is still under development. There is an issue found in EclipseLink that failed to run tests on GlassFish 8.0.0, see [eclipselink#2656](https://github.com/eclipse-ee4j/eclipselink/issues/2656)
