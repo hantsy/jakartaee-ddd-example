@@ -60,7 +60,7 @@
         <wildfly.version>39.0.1.Final</wildfly.version>
         <wildfly-maven-plugin.version>5.1.5.Final</wildfly-maven-plugin.version>
         <wildfly-arquillian.version>5.1.0.Final</wildfly-arquillian.version>
-        <resteasy.version>7.0.1.Final</resteasy.version>
+        <resteasy.version>7.0.2.Final</resteasy.version>
 
         <!-- by default skip tests -->
         <skip.unit.tests>false</skip.unit.tests>
