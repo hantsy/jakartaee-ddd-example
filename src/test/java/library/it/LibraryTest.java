@@ -42,6 +42,7 @@ import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -194,7 +195,7 @@ public class LibraryTest {
             copyRepository.save(new Copy(copyId, book.getId(), new BarCode("BC003")));
         });
 
-        var overdueLoanIdHolder = new LoanId[1];
+        var overdueLoanIdHolder = new AtomicReference<LoanId>();
         UserId userId = new UserId();
         withTx(() -> {
             // Create a loan with an expected return date 35 days in the past
@@ -205,14 +206,14 @@ public class LibraryTest {
                     LocalDateTime.now().minusDays(35),
                     pastDate);
             loanRepository.save(loan);
-            overdueLoanIdHolder[0] = loan.id();
+            overdueLoanIdHolder.set(loan.id());
 
             // Return the book — should trigger overdue fee
             returnBookUseCase.execute(loan.id());
         });
 
         withTx(() -> {
-            var loan = loanRepository.findByIdOrThrow(overdueLoanIdHolder[0]);
+            var loan = loanRepository.findByIdOrThrow(overdueLoanIdHolder.get());
             assertThat(loan.returnedAt()).isNotNull();
             assertThat(loan.overdueFee()).isEqualTo(OverdueFee.BEYOND_A_MONTH.amount());
         });
