@@ -30,6 +30,7 @@ public class ReturnBookUseCase {
     public void execute(LoanId loanId) {
         Loan loan = loanRepository.findByIdOrThrow(loanId);
         loan.returned();
+        loanRepository.save(loan);
 
         LOGGER.log(Level.INFO, "firing returned event for loan with id = " + loanId);
         loanClosedEvent.fire(new LoanClosed(loan.copyId()));
