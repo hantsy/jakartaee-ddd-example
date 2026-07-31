@@ -27,6 +27,7 @@ import library.catalog.domain.*;
 import library.lending.application.RentBookUseCase;
 import library.lending.application.ReturnBookUseCase;
 import library.lending.domain.Loan;
+import library.lending.domain.LoanId;
 import library.lending.domain.LoanRepository;
 import library.lending.domain.OverdueFee;
 import library.lending.domain.UserId;
@@ -193,6 +194,7 @@ public class LibraryTest {
             copyRepository.save(new Copy(copyId, book.getId(), new BarCode("BC003")));
         });
 
+        var overdueLoanIdHolder = new LoanId[1];
         UserId userId = new UserId();
         withTx(() -> {
             // Create a loan with an expected return date 35 days in the past
@@ -203,15 +205,14 @@ public class LibraryTest {
                     LocalDateTime.now().minusDays(35),
                     pastDate);
             loanRepository.save(loan);
+            overdueLoanIdHolder[0] = loan.id();
 
             // Return the book — should trigger overdue fee
             returnBookUseCase.execute(loan.id());
         });
 
         withTx(() -> {
-            var allLoans = loanRepository.findAll().toList();
-            assertThat(allLoans).hasSize(1);
-            var loan = allLoans.getFirst();
+            var loan = loanRepository.findByIdOrThrow(overdueLoanIdHolder[0]);
             assertThat(loan.returnedAt()).isNotNull();
             assertThat(loan.overdueFee()).isEqualTo(OverdueFee.BEYOND_A_MONTH.amount());
         });
