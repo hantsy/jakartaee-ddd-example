@@ -28,6 +28,7 @@ import library.lending.application.RentBookUseCase;
 import library.lending.application.ReturnBookUseCase;
 import library.lending.domain.Loan;
 import library.lending.domain.LoanRepository;
+import library.lending.domain.OverdueFee;
 import library.lending.domain.UserId;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit5.container.annotation.ArquillianTest;
@@ -37,6 +38,8 @@ import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -141,7 +144,7 @@ public class LibraryTest {
         UserId userId = new UserId();
         withTx(() -> {
             // Rent a book
-            rentBookUseCase.execute(new library.lending.domain.CopyId(copyId.id()), userId);
+            rentBookUseCase.execute(library.lending.domain.CopyId.of(copyId.id()), userId);
         });
 
         withTx(() -> {
@@ -155,7 +158,7 @@ public class LibraryTest {
 
         withTx(() -> {
             // rent again should throw exception
-            assertThrows(Exception.class, () -> rentBookUseCase.execute(new library.lending.domain.CopyId(copyId.id()), userId));
+            assertThrows(Exception.class, () -> rentBookUseCase.execute(library.lending.domain.CopyId.of(copyId.id()), userId));
         });
 
         withTx(() -> {
@@ -178,6 +181,39 @@ public class LibraryTest {
                 assertThat(returnedCopyOptional).isPresent();
                 assertThat(returnedCopyOptional.get().isAvailable()).isTrue();
             });
+        });
+    }
+
+    @Test
+    public void testOverdueReturn() throws Exception {
+        CopyId copyId = new CopyId();
+        withTx(() -> {
+            Book book = new Book("Domain-Driven Design", new Isbn("9780321125217"));
+            bookRepository.save(book);
+            copyRepository.save(new Copy(copyId, book.getId(), new BarCode("BC003")));
+        });
+
+        UserId userId = new UserId();
+        withTx(() -> {
+            // Create a loan with an expected return date 35 days in the past
+            var pastDate = LocalDate.now().minusDays(35);
+            var loan = new Loan(
+                    library.lending.domain.CopyId.of(copyId.id()),
+                    userId,
+                    LocalDateTime.now().minusDays(35),
+                    pastDate);
+            loanRepository.save(loan);
+
+            // Return the book — should trigger overdue fee
+            returnBookUseCase.execute(loan.id());
+        });
+
+        withTx(() -> {
+            var allLoans = loanRepository.findAll().toList();
+            assertThat(allLoans).hasSize(1);
+            var loan = allLoans.getFirst();
+            assertThat(loan.returnedAt()).isNotNull();
+            assertThat(loan.overdueFee()).isEqualTo(OverdueFee.BEYOND_A_MONTH.amount());
         });
     }
 }

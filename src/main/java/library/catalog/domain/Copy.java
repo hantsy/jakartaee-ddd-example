@@ -15,6 +15,9 @@ public class Copy {
     private BarCode barCode;
     private boolean available;
 
+    @Version
+    private Long version;
+
     Copy() {
     }
 
