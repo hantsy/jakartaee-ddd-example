@@ -51,9 +51,9 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ArquillianTest
-public class LibraryTest {
+public class LibraryIT {
 
-    private final static Logger LOGGER = Logger.getLogger(LibraryTest.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(LibraryIT.class.getName());
 
     @Deployment
     public static WebArchive createDeployment() {
@@ -64,7 +64,7 @@ public class LibraryTest {
                 .resolve("org.assertj:assertj-core", "org.awaitility:awaitility")
                 .withTransitivity()
                 .asFile();
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "LibraryTest.war")
+        WebArchive war = ShrinkWrap.create(WebArchive.class, "LibraryIT.war")
                 .addAsLibraries(extraJars)
                 .addPackages(true, "library.common", "library.lending", "library.catalog")
                 .addAsResource("test-persistence.xml", "/META-INF/persistence.xml")
