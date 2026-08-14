@@ -3,6 +3,7 @@ package library.lending.application;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import library.lending.domain.CopyId;
+import library.lending.domain.CopyNotAvailableException;
 import library.lending.domain.LoanRepository;
 
 @ApplicationScoped
@@ -19,7 +20,7 @@ public class CopyAvailabilityValidator {
 
     public void checkAvailable(CopyId copyId) {
         if (!loanRepository.isAvailable(copyId)) {
-            throw new IllegalArgumentException("copy with id = " + copyId + " is not available");
+            throw new CopyNotAvailableException(copyId);
         }
     }
 }

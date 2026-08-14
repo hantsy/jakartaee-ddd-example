@@ -20,6 +20,9 @@ public class AddBookToCatalogUseCase {
     }
 
     public void execute(Isbn isbn) {
+        if (bookRepository.existsByIsbn(isbn)) {
+            throw new BookAlreadyExistsException(isbn);
+        }
         BookInformation result = bookSearchService.search(isbn);
         Book book = new Book(result.title(), isbn);
         bookRepository.save(book);

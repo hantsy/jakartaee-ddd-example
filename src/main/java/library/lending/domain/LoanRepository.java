@@ -12,6 +12,6 @@ public interface LoanRepository extends CrudRepository<Loan, LoanId> {
     boolean isAvailable(CopyId id);
 
     default Loan findByIdOrThrow(LoanId loanId) {
-        return findById(loanId).orElseThrow();
+        return findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
     }
 }

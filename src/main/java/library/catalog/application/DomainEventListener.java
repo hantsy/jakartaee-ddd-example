@@ -5,6 +5,7 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import library.catalog.domain.Copy;
 import library.catalog.domain.CopyId;
+import library.catalog.domain.CopyNotFoundException;
 import library.catalog.domain.CopyRepository;
 import library.lending.domain.LoanClosed;
 import library.lending.domain.LoanCreated;
@@ -27,7 +28,8 @@ public class DomainEventListener {
 
     public void onLoanCreated(@Observes LoanCreated event) {
         LOGGER.log(Level.INFO, "handling LoanCreated:{0}", new Object[]{event});
-        Copy copy = copyRepository.findById(new CopyId(event.copyId().id())).orElseThrow();
+        var copyId = new CopyId(event.copyId().id());
+        Copy copy = copyRepository.findById(copyId).orElseThrow(() -> new CopyNotFoundException(copyId));
         copy.makeUnavailable();
         copyRepository.save(copy);
     }
@@ -35,7 +37,8 @@ public class DomainEventListener {
 
     public void onLoanClosed(@Observes LoanClosed event) {
         LOGGER.log(Level.INFO, "handling LoanClosed:{0}", new Object[]{event});
-        Copy copy = copyRepository.findById(new CopyId(event.copyId().id())).orElseThrow();
+        var copyId = new CopyId(event.copyId().id());
+        Copy copy = copyRepository.findById(copyId).orElseThrow(() -> new CopyNotFoundException(copyId));
         copy.makeAvailable();
         copyRepository.save(copy);
     }
