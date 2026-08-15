@@ -47,6 +47,11 @@ class OpenLibraryBookSearchServiceTest {
     void searchWithKnownIsbnShouldReturnBookInformation() {
         stubFor(get(urlEqualTo("/isbn/" + KNOWN_ISBN + ".json"))
                 .willReturn(aResponse()
+                        .withStatus(302)
+                        .withHeader("Location", "/books/OL31838212M.json")));
+
+        stubFor(get(urlEqualTo("/books/OL31838212M.json"))
+                .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
                         .withBody("""
@@ -63,6 +68,8 @@ class OpenLibraryBookSearchServiceTest {
         assertThat(result.title()).isEqualTo("Effective Java");
 
         verify(getRequestedFor(urlEqualTo("/isbn/" + KNOWN_ISBN + ".json"))
+                .withHeader("Accept", equalTo("application/json")));
+        verify(getRequestedFor(urlEqualTo("/books/OL31838212M.json"))
                 .withHeader("Accept", equalTo("application/json")));
     }
 

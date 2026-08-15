@@ -82,10 +82,10 @@ public class BookSearchServiceIT {
 
     @Test
     public void searchUnknownIsbnThrowsBookNotFoundException() {
-        // 978-000000000x is an unallocated range: the ISBN is checksum-valid
-        // but Open Library returns 404, which the adapter maps to BookNotFoundException
-        assertThatThrownBy(() -> bookSearchService.search(new Isbn("9780000000002")))
+        // 978-0-99999999-8 is a checksum-valid ISBN in an unallocated range:
+        // Open Library returns 404, which the adapter maps to BookNotFoundException.
+        assertThatThrownBy(() -> bookSearchService.search(new Isbn("9780999999998")))
                 .isInstanceOf(BookNotFoundException.class)
-                .hasMessageContaining("9780000000002");
+                .hasMessageContaining("9780999999998");
     }
 }
