@@ -53,7 +53,7 @@
         <wiremock.version>3.13.2</wiremock.version>
 
         <!-- Glassfish server -->
-        <glassfish.version>8.0.4</glassfish.version>
+        <glassfish.version>8.0.5</glassfish.version>
         <jersey.version>4.0.3</jersey.version>
         <eclipselink.version>5.0.2</eclipselink.version>
         <arquillian-glassfish.version>7.1.1</arquillian-glassfish.version>
