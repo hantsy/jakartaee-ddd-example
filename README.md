@@ -9,7 +9,7 @@ This Library example demonstrates how to implement a modular DDD application usi
 The idea is from [Spring IO 2024 Talk: Implementing Domain Driven Design with Spring](https://www.youtube.com/watch?v=VGhg6Tfxb60) by [Maciej Walkowiak](https://github.com/maciejwalkowiak). I reimplemented it using the latest Jakarta EE 11 specification, based on [the original sample code](https://github.com/maciejwalkowiak/implementing-ddd-with-spring-talk).
 
 > [!WARNING]
-> This project is still under development. There is an issue found in EclipseLink that failed to run tests on GlassFish 8.0.0, see [eclipselink#2656](https://github.com/eclipse-ee4j/eclipselink/issues/2656)
+> This project is still under development. <del>There is an issue found in EclipseLink that failed to run tests on GlassFish 8.0.0, see [eclipselink#2656](https://github.com/eclipse-ee4j/eclipselink/issues/2656)</del> Fixed in GlassFish v8.0.5.
 
 ## Prerequisites
 
