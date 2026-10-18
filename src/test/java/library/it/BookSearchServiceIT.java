@@ -8,7 +8,7 @@ import library.catalog.domain.BookSearchService;
 import library.catalog.domain.Isbn;
 import library.catalog.infrastructure.OpenLibraryBookSearchService;
 import library.catalog.infrastructure.OpenLibraryIsbnSearchResult;
-import library.common.DomainException;
+import library.shared.DomainException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit5.container.annotation.ArquillianTest;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -58,7 +58,7 @@ public class BookSearchServiceIT {
                 BookNotFoundException.class,     // domain exception: upstream returned 404
                 BookSearchException.class);      // domain exception: upstream/network failure
 
-        // --- Shared kernel (library.common): base class of the domain exceptions ---
+        // --- Shared kernel (library.shared): base class of the domain exceptions ---
         jar.addClasses(
                 DomainException.class);          // abstract base of all domain exceptions
 

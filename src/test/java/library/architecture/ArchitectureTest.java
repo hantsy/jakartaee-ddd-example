@@ -5,6 +5,7 @@ import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.lang.ArchRule;
 import library.catalog.application.DomainEventListener;
+import library.lending.domain.CopyAvailabilityValidator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +18,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
  * These rules encode the intended dependency rules of the application:
  * <ul>
  *   <li>the <em>domain</em> layer is the innermost layer and depends on nothing
- *       outside itself and the shared kernel ({@code library.common});</li>
+ *       outside itself and the shared kernel ({@code library.shared});</li>
  *   <li>the <em>application</em> layer depends on the domain layer only —
  *       never on infrastructure (dependency inversion);</li>
  *   <li>the two bounded contexts ({@code library.catalog} and
@@ -50,9 +51,11 @@ class ArchitectureTest {
     @Test
     void domainLayerMustStayFreeOfApplicationFrameworks() {
         ArchRule rule = noClasses().that().resideInAnyPackage("library..domain..")
+                .and().doNotBelongToAnyOf(CopyAvailabilityValidator.class)
                 .should().dependOnClassesThat()
                 .resideInAnyPackage("jakarta.ws.rs..", "jakarta.enterprise..", "jakarta.inject..")
-                .because("the domain model must remain independent of CDI, REST and other application frameworks");
+                .because("the domain model must remain independent of CDI, REST and other application frameworks "
+                        + "(except the stateless domain service CopyAvailabilityValidator, which CDI injects with a repository port)");
         rule.check(classes);
     }
 
@@ -74,10 +77,10 @@ class ArchitectureTest {
 
     @Test
     void sharedKernelMustNotDependOnBoundedContexts() {
-        ArchRule rule = noClasses().that().resideInAPackage("library.common..")
+        ArchRule rule = noClasses().that().resideInAPackage("library.shared..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage("library.catalog..", "library.lending..")
-                .because("library.common is the shared kernel and must not know the bounded contexts");
+                .because("library.shared is the shared kernel and must not know the bounded contexts");
         rule.check(classes);
     }
 

@@ -1,6 +1,6 @@
 package library.catalog.domain;
 
-import library.common.DomainException;
+import library.shared.DomainException;
 
 /**
  * Thrown when an external book search (e.g. the Open Library adapter in the

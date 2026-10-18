@@ -10,6 +10,8 @@ import java.util.Objects;
 
 @Entity
 public class Loan {
+    private static final int LOAN_TERM_DAYS = 30;
+
     @EmbeddedId
     private LoanId loanId;
     @Embedded
@@ -49,8 +51,8 @@ public class Loan {
         return this.overdueFee;
     }
 
-    public Loan(CopyId copyId, UserId userId) {
-        this(copyId, userId, LocalDateTime.now(), LocalDate.now().plusDays(30));
+    public Loan(CopyId copyId, UserId userId, LocalDateTime createdAt) {
+        this(copyId, userId, createdAt, createdAt.toLocalDate().plusDays(LOAN_TERM_DAYS));
     }
 
     public Loan(CopyId copyId, UserId userId, LocalDateTime createdAt, LocalDate expectedReturnDate) {
@@ -65,9 +67,10 @@ public class Loan {
         this.expectedReturnDate = expectedReturnDate;
     }
 
-    public void returned() {
-        this.returnedAt = LocalDateTime.now();
-        if (this.returnedAt.isAfter(expectedReturnDate.atStartOfDay())) {
+    public void returned(LocalDateTime returnedAt) {
+        Objects.requireNonNull(returnedAt, "returnedAt must not be null");
+        this.returnedAt = returnedAt;
+        if (returnedAt.isAfter(expectedReturnDate.atStartOfDay())) {
             var daysOverdue = ChronoUnit.DAYS.between(expectedReturnDate, returnedAt.toLocalDate());
             var fee = OverdueFee.forDays(daysOverdue);
             this.overdueFee = fee != null ? fee.amount() : null;

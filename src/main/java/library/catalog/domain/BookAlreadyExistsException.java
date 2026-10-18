@@ -1,6 +1,6 @@
 package library.catalog.domain;
 
-import library.common.DomainException;
+import library.shared.DomainException;
 
 /**
  * Thrown when a book with the same ISBN is already registered in the catalog.

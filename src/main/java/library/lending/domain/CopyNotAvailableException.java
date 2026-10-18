@@ -1,6 +1,6 @@
 package library.lending.domain;
 
-import library.common.DomainException;
+import library.shared.DomainException;
 
 /**
  * Thrown when a copy cannot be rented because it is already on loan.

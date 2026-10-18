@@ -2,7 +2,7 @@ package library.catalog.application;
 
 import jakarta.inject.Inject;
 import library.catalog.domain.*;
-import library.common.UseCase;
+import library.shared.UseCase;
 
 @UseCase
 public class AddBookToCatalogUseCase {

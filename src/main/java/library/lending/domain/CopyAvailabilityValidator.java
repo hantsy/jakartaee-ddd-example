@@ -1,10 +1,7 @@
-package library.lending.application;
+package library.lending.domain;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import library.lending.domain.CopyId;
-import library.lending.domain.CopyNotAvailableException;
-import library.lending.domain.LoanRepository;
 
 @ApplicationScoped
 public class CopyAvailabilityValidator {

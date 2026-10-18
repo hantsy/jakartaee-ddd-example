@@ -1,4 +1,4 @@
-package library.common;
+package library.shared;
 
 /**
  * Base type for all domain exceptions in the Library application.

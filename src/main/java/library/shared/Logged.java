@@ -1,4 +1,4 @@
-package library.common;
+package library.shared;
 
 import jakarta.interceptor.InterceptorBinding;
 

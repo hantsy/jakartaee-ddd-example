@@ -1,5 +1,4 @@
-package library.common;
-
+package library.shared;
 
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
