@@ -8,76 +8,83 @@ status: draft
 
 # Applying DDD with Jakarta EE: Strategic and Tactical Design with Jakarta Data
 
-Domain-Driven Design splits into two halves, and most Jakarta EE writing only
-ever covers the second one.
+Domain-Driven Design (DDD) helps teams build software around a shared model of a
+business domain. This article is for Java developers who want to see how DDD
+concepts shape a Jakarta EE application. It follows a small library example from
+requirements through design, implementation, and tests.
 
-**Strategic design** is a conversation with the domain expert. Which parts of the
-business are worth investing in and which are not. What words mean. Where the
-model boundaries go and how the pieces on either side relate. It produces
-subdomains, a ubiquitous language, bounded contexts, and a context map — and not
-one line of code.
+You should be comfortable with Java and basic Jakarta EE. You don't need prior
+DDD experience. If DDD is new to you, start with Martin Fowler's
+[Domain-Driven Design overview](https://martinfowler.com/bliki/DomainDrivenDesign.html)
+or the
+[introduction by Dan Haywood](https://www.dddcommunity.org/learning-ddd/haywood_2010/)
+listed by the DDD Community. This article focuses on one sample; it isn't a
+complete guide to DDD or a production-ready library system.
 
-**Tactical design** is what you build afterwards: entities, value objects,
-aggregate roots, repositories, domain events, domain services, application
-services. This is where Jakarta EE 11 lines up with Evans' building blocks almost
-one-to-one — and where **Jakarta Data** finally turns the repository from
-something you write into something you declare.
+Strategic design helps you understand the domain, agree on its language, and
+choose model boundaries. Tactical design applies those decisions in code, using
+building blocks such as entities, value objects, aggregates, repositories, and
+domain events. These activities inform each other; they aren't separate phases
+that you complete once. Jakarta EE provides infrastructure for implementing
+these patterns, and Jakarta Data lets you declare repository interfaces instead
+of writing common persistence implementations by hand.
 
-The two halves have different audiences, so this post keeps them strictly apart.
-Parts 0 and I contain no framework names and no code. Part II is where every
-strategic decision becomes Jakarta EE.
+Parts 0 and I introduce the library requirements and design without framework
+code. Part II maps those decisions to Jakarta EE. Part III compares the
+requirements with the tests, and Part IV shows how to build and run the sample.
 
-The subject is [`jakartaee-ddd-example`](https://github.com/hantsy/jakartaee-ddd-example),
-a library system in two bounded contexts — a reimplementation of Maciej
-Walkowiak's
-[Spring IO 2024 talk *Implementing Domain Driven Design with Spring*](https://www.youtube.com/watch?v=VGhg6Tfxb60)
-([original sample](https://github.com/maciejwalkowiak/implementing-ddd-with-spring-talk)),
-ported to Jakarta EE 11.
+The example is
+[`jakartaee-ddd-example`](https://github.com/hantsy/jakartaee-ddd-example), a
+library system with cataloging and lending contexts. It adapts the example from
+Maciej Walkowiak's
+[Spring IO 2024 talk, *Implementing Domain-Driven Design with Spring*](https://www.youtube.com/watch?v=VGhg6Tfxb60)
+([source code](https://github.com/maciejwalkowiak/implementing-ddd-with-spring-talk))
+to Jakarta EE 11.
 
 ---
 
-# Part 0 — Requirements
+## Part 0 — Requirements
 
-Rather than a feature list, the requirements are captured two ways: a **story**
-that reads the way a librarian would tell it, and an **event storm** that pins
-down the commands, events, policies, and actors precisely. Then each journey gets
-numbered acceptance scenarios, which Part III checks against the code one by one.
+The requirements use a short story and an event-storming summary. The story
+provides context; the event storm identifies commands, events, policies, and
+actors. Numbered scenarios make it possible to compare the requirements with the
+tests in Part III.
 
-## 0.1 The story
+### 0.1 The story
 
 > It is Monday morning and the library has just received a new shipment. Priya,
-> the cataloguing librarian, picks up *Effective Java* and types its ISBN into
+> the cataloging librarian, picks up *Effective Java* and types its ISBN into
 > the desk terminal. She does not type the title — the system looks it up in the
-> national bibliographic service and fills it in. If the number is wrong, or the
-> book is already on the catalogue, the system tells her and changes nothing. She
+> external bibliographic service and fills it in. If the number is wrong, or the
+> book is already on the catalog, the system tells her and changes nothing. She
 > then sticks four barcodes on four physical copies and registers each one. All
 > four go on the shelf as available.
 >
 > At lunchtime Sam borrows one of the four. The desk scans the barcode, and a
 > loan opens for thirty days. That copy immediately leaves the shelf — if Priya
-> looks at the catalogue she will see three available, not four. If Sam's friend
+> looks at the catalog she will see three available, not four. If Sam's friend
 > tries to borrow the same physical copy a minute later, the desk refuses: that
 > copy is out. The other three are unaffected.
 >
 > Six weeks later Sam brings it back. The desk closes the loan and the copy goes
-> back on the shelf. Because it is more than thirty days late, a fee is charged —
+> back on the shelf. Because it is almost two weeks late, a fee is charged —
 > and the amount depends on how late it is. A week late costs less than a month
 > late. The fee belongs to that loan, not to Sam as a person and not to the copy:
 > the same copy returned on time by another borrower costs nothing.
 >
 > Meanwhile the other three copies have been borrowed and returned a dozen times
-> each. The catalogue entry for *Effective Java* has not changed once.
+> each. The catalog entry for *Effective Java* has not changed once.
 
-Three things in that story are load-bearing, and the rest of the design falls out
-of them:
+Three details guide the design:
 
 - Priya never retypes a title, and a failed lookup leaves no half-created entry.
 - The shelf and the loans are two different concerns that must nonetheless agree.
 - A fee is a property of one loan, decided once, at the moment of return.
 
-## 0.2 The event storm
+### 0.2 The event storm
 
-Standard Alberto Brandolini notation, flattened to text:
+The diagram uses a text-only version of Alberto Brandolini's event-storming
+notation:
 
 ```
   (actor)          person who does something
@@ -89,10 +96,10 @@ Standard Alberto Brandolini notation, flattened to text:
   «AGGREGATE»      the thing that decides whether a command is allowed
 ```
 
-**Cataloguing journey**
+**Cataloging journey**
 
 ```
-(Librarian) ─▶ [Catalogue Book] ─▶ «BOOK» ─▶ [Book Catalogued] ─▶ (Catalogue listing)
+(Librarian) ─▶ [Catalog Book] ─▶ «BOOK» ─▶ [Book Cataloged] ─▶ (Catalog listing)
                      │
                      └─▶ [Resolve Title] ─▶ (BIBLIOGRAPHIC SERVICE)
                                                 │
@@ -123,13 +130,13 @@ Standard Alberto Brandolini notation, flattened to text:
                                                   └─▶ [Overdue Fee Charged]
 ```
 
-### The storm, tabulated
+#### The storm, tabulated
 
 **Domain events** — what actually happened, in the past tense.
 
 | Event | Raised by | Who cares |
-|---|---|---|
-| Book Catalogued | the book | cataloguing staff, the catalogue listing |
+| --- | --- | --- |
+| Book Cataloged | the book | cataloging staff, the catalog listing |
 | Copy Registered | the copy | the shelf |
 | Loan Opened | the loan | the borrower, and the shelf |
 | Loan Closed | the loan | the desk, the shelf, and billing |
@@ -139,8 +146,8 @@ Standard Alberto Brandolini notation, flattened to text:
 **Commands** — what people ask for.
 
 | Command | Actor | Aggregate that decides |
-|---|---|---|
-| Catalogue Book | Librarian | Book |
+| --- | --- | --- |
+| Catalog Book | Librarian | Book |
 | Register Copy | Librarian | Copy |
 | Lend Copy | Borrower | Loan |
 | Return Copy | Desk staff | Loan |
@@ -149,53 +156,54 @@ Standard Alberto Brandolini notation, flattened to text:
 library meet.
 
 | Whenever | Then |
-|---|---|
-| A book is catalogued and its ISBN is already present | Refuse; change nothing |
-| A title cannot be resolved | Refuse; leave the catalogue untouched |
+| --- | --- |
+| A book is cataloged and its ISBN is already present | Refuse; change nothing |
+| A title cannot be resolved | Refuse; leave the catalog untouched |
 | A loan opens | Take that copy off the shelf |
 | A loan closes | Put that copy back on the shelf |
 | A loan closes after its due date | Charge the matching tier |
 
-**Read models** — Catalogue listing, Shelf status, Borrower's loans. Each is fed
-by events, and none of them is allowed to *decide* anything.
+**Read models** — Catalog listing, Shelf status, and Borrower's loans are
+views the users need. This sample identifies those queries but doesn't implement
+separate read models or event-fed projections.
 
-**External system** — the Bibliographic Service. It is the only thing in the
-storm the library does not control, which is exactly why it appears once, behind
-a command of its own.
+**External system** — the Bibliographic Service. It sits outside the library's
+control, so the model puts it behind a dedicated title-resolution command.
 
-## 0.3 Journeys and acceptance scenarios
+### 0.3 Journeys and acceptance scenarios
 
-The numbered IDs below are what Part III's coverage matrix refers back to.
+The numbered IDs in the following scenarios are what Part III's coverage
+matrix refers back to.
 
-### J1 — Catalogue a book by ISBN
+#### J1 — Catalog a book by ISBN
 
 | # | Scenario | What must happen |
-|---|---|---|
+| --- | --- | --- |
 | 1.1 | The number typed is not a valid ISBN | Refused on the spot. Nothing is added; the librarian is told the number is wrong. |
-| 1.2 | The book is already in the catalogue | Refused as a duplicate. The existing entry is untouched — no second record, no overwrite. |
-| 1.3 | The ISBN is valid and new | The title is resolved from the bibliographic service and a new catalogue entry is created. |
+| 1.2 | The book is already in the catalog | Refused as a duplicate. The existing entry is untouched — no second record, no overwrite. |
+| 1.3 | The ISBN is valid and new | The title is resolved from the bibliographic service and a new catalog entry is created. |
 | 1.4 | The bibliographic service has never heard of the ISBN | The librarian is told the book could not be found. Nothing is added — an entry with no title is worse than no entry. |
 | 1.5 | The bibliographic service is failing | The librarian is told the lookup failed and may retry later. Nothing is added. |
 | 1.6 | The network is down | As 1.5. |
 
-**Business rule.** Cataloguing a book is all-or-nothing. If the title cannot be
+**Business rule.** Cataloging a book is all-or-nothing. If the title cannot be
 resolved, no partial entry is left behind for someone to clean up later.
 
-### J2 — Register a physical copy
+#### J2 — Register a physical copy
 
 | # | Scenario | What must happen |
-|---|---|---|
+| --- | --- | --- |
 | 2.1 | A valid book and barcode | A new copy exists, on the shelf, available to borrow. |
 | 2.2 | Either the book or the barcode is missing | Refused. A copy must belong to a book and must be identifiable at the desk. |
 
 **Business rule.** A copy can only be registered against a book that is already
-in the catalogue. *Whether the system enforces this is a separate question — see
+in the catalog. *Whether the system enforces this is a separate question — see
 Part III.*
 
-### J3 — Lend a copy
+#### J3 — Lend a copy
 
 | # | Scenario | What must happen |
-|---|---|---|
+| --- | --- | --- |
 | 3.1 | The copy is on the shelf | A loan opens, due in thirty days. The copy leaves the shelf. |
 | 3.2 | The copy is already out | Refused. The borrower is told the copy is unavailable. No second loan opens. |
 | 3.3 | Two borrowers ask for the same copy at the same instant | Exactly one loan opens; the other is refused. |
@@ -204,19 +212,21 @@ Part III.*
 always thirty days out. Lending is atomic — either the loan exists *and* the copy
 is off the shelf, or neither is true.
 
-### J4 — Return a copy
+#### J4 — Return a copy
 
 | # | Scenario | What must happen |
-|---|---|---|
+| --- | --- | --- |
 | 4.1 | The loan is open | The loan closes, the return date is recorded, the copy is back on the shelf. |
-| 4.2 | The loan is not recognised | Refused. The desk cannot close a loan it cannot find. |
+| 4.2 | The loan is not recognized | Refused. The desk cannot close a loan it cannot find. |
 | 4.3 | Returned on or before the due date | No fee. |
 | 4.4 | Returned after the due date | A fee is charged, per J5. |
 
-### J5 — The overdue fee
+#### J5 — The overdue fee
+
+The library charges a flat fee based on the number of days a copy is overdue:
 
 | Days late | Fee |
-|---|---|
+| --- | --- |
 | Not late | — |
 | 1 – 7 | 5.00 |
 | 8 – 14 | 10.00 |
@@ -229,228 +239,192 @@ and not to the borrower.
 
 ---
 
-# Part I — Strategic Design
+## Part I — Strategic design
 
-Strategic design is what the domain expert and the architect settle *together*,
-before anyone opens an editor. It answers the questions you cannot fix later with
-a refactor. Nothing in this section mentions a framework, a class, or an
-annotation.
+Strategic design uses conversations with domain experts to understand the
+business, define the model, and identify its boundaries. Teams revisit these
+decisions as they learn more; strategic design doesn't have to finish before
+implementation begins. This section focuses on the domain rather than on
+framework details.
 
-## 1. Subdomain classification
+### 1. Subdomain classification
 
-Not every part of a business deserves the same investment. DDD sorts the problem
-space into three kinds of subdomain, and the sort drives where your best people
-and your most careful modelling go.
+DDD distinguishes three kinds of subdomain. The classification helps a team
+decide where to invest in custom software and where to use an existing solution:
 
-- **Core** — the reason the organisation exists. If this is mediocre, the
-  business is mediocre. Nobody sells you this; you build it.
-- **Supporting** — necessary, but not differentiating. It has to work and it has
-  to be correct, yet nobody chooses your library because of it.
-- **Generic** — a solved problem that every business in the sector has. You buy
-  it, rent it, or integrate with a standard service. You never build it.
+- **Core:** the part of the business that provides its main competitive
+  advantage. A team usually invests in a model tailored to its needs.
+- **Supporting:** necessary for the business, but not a source of competitive
+  advantage. A team can build a focused solution or adapt an existing one.
+- **Generic:** a common problem with established solutions. A team can buy,
+  adopt, or integrate a standard solution instead of building one from scratch.
 
-For this library:
+These classifications depend on the organization. For this example, assume the
+library treats lending as its core subdomain, cataloging as supporting, and
+bibliographic lookup as generic:
 
-| Subdomain | Class | Why | Consequence |
-|---|---|---|---|
-| **Lending** | **Core** | This is what a library *does*. Loan length, availability contention, the tiered fee — these are policy decisions that differ from library to library and change with the board's mood. There is no product to buy that encodes *this* library's rules. | Deserves the careful modelling, the invariants, the concurrency handling, and the tests. |
-| **Cataloguing** | **Supporting** | Holding a list of works and physical items is bookkeeping. It must be accurate, and it follows external standards (ISBN, bibliographic records), but no borrower chooses a library over its catalogue schema. | Build the simplest thing that is correct. Resist gold-plating. |
-| **Bibliographic lookup** | **Generic** | Resolving an ISBN to a title is a completely solved problem, offered by Open Library, WorldCat, and national libraries. Writing your own would be a waste and a liability. | Never implement. Integrate — and keep the integration replaceable, because the provider will change. |
+| Subdomain | Class | Rationale in this example | Design consequence |
+| --- | --- | --- | --- |
+| **Lending** | **Core** | Loan duration, availability, and fees are library-specific policies. | Model and test these rules carefully. |
+| **Cataloging** | **Supporting** | The library needs accurate records of books and physical copies. | Keep cataloging focused on the requirements in this example. |
+| **Bibliographic lookup** | **Generic** | External services can resolve ISBNs to bibliographic information. | Integrate through a replaceable interface rather than building a lookup service here. |
 
-**What the classification actually buys you.** It tells you where to spend. The
-core subdomain is the one place in this system with real contention, real money,
-and real invariants — and correspondingly it is where the model is richest. The
-generic subdomain is the one place with an adapter behind a boundary, precisely
-so that swapping Open Library for WorldCat next year touches one class.
+This classification helps prioritize design effort. Lending has the most
+business-specific policies in this example, so the model focuses on loan
+availability and overdue fees. The bibliographic lookup sits behind an
+interface, which makes the provider easier to replace.
 
-Note also what is *absent* from the list: there is no "user management"
-subdomain. A borrower is only ever an identifier on a loan. The moment someone
-proposes building authentication, profiles, and notifications in here, the
-subdomain map is the artefact that says *that is generic, buy it, and keep it out
-of the core*.
+The example doesn't include user management. A borrower appears only as an
+identifier on a loan; authentication, profiles, and notifications are outside
+its scope. A real team would classify those capabilities based on its own
+business and existing systems.
 
-**One caution.** A subdomain is a partition of the *business*. A bounded context
-is a partition of the *model*. They often coincide, and confusing them is a
-common mistake — the business does not reorganise just because you redrew a
-package diagram. Here they deliberately align, with one exception: the generic
-bibliographic subdomain does not get its own context. It lives inside
-cataloguing, behind a boundary that cataloguing owns.
+A subdomain partitions the business problem; a bounded context defines where a
+particular model and its language apply. They can align, but they don't have to.
+Here, the bibliographic lookup subdomain has no separate context. Cataloging
+owns the interface to the external provider.
 
-## 2. Ubiquitous language
+### 2. Ubiquitous language
 
-One vocabulary, agreed up front, used identically in conversation, in the
-requirements, and eventually in the code:
+The team uses the following terms consistently in its conversations,
+requirements, and code:
 
 | Term | What it means here |
-|---|---|
-| **Book** | A *work*. A catalogue entry, identified by its ISBN. Not a physical object. |
+| --- | --- |
+| **Book** | A catalog record identified by an ISBN. It isn't a physical item. |
 | **Title** | The published name of a book. |
-| **ISBN** | The international standard number identifying a book. |
+| **ISBN** | A number that identifies a particular book edition and format; this sample uses it to find a catalog record. |
 | **Copy** | One physical item on the shelf — a specific book, with its own barcode. |
 | **Barcode** | The sticker on a copy, scanned at the desk. |
-| **Shelf status** | Whether a copy is currently available to borrow. |
-| **Borrower** | A library user permitted to take a copy out. |
+| **Shelf status** | Whether a copy can be borrowed. |
+| **Borrower** | A library member identified on a loan. |
 | **Loan** | The record that a borrower holds a copy — opened on one date, due on another. |
 | **Due date** | Thirty days after a loan opens. |
 | **Return** | Closing an open loan. |
-| **Overdue** | A copy that came back after its due date. |
+| **Overdue** | A loan returned after its due date. |
 | **Overdue fee** | A tiered charge for lateness. |
-| **Catalogue** | The library's list of the books it holds. |
+| **Catalog** | The library's list of the books it holds. |
 
-The distinction that carries the whole model: **a book is not a copy.** The
-library holds one *book* called *Domain-Driven Design* and four *copies* of it.
-Collapsing those two is the classic error in library systems — it is what forces
-you to duplicate the title four times, and what makes it impossible to say "this
-one is overdue but that one is on the shelf."
+The model distinguishes a catalog record from each physical item:
+**a book isn't a copy.** A library can hold one catalog record for
+*Domain-Driven Design* and four physical copies. Each copy has its own barcode
+and availability.
 
-Two language traps the glossary exists to prevent:
+The glossary also clarifies two terms that could otherwise be ambiguous:
 
-- **"Available" is ambiguous.** Available to *whom*, decided *by what*? In this
-  domain it means precisely: no open loan exists against this copy. Anything
-  vaguer and the cataloguing staff and the desk staff will disagree silently.
-- **"Return" is a verb and a date.** The act of closing a loan, and the recorded
-  day it happened, are different things — and the fee depends only on the second.
+- **Available:** In this example, a copy is available when it has no open loan.
+- **Return:** Returning a copy closes a loan. The return date is recorded
+  separately and determines whether the loan is overdue.
 
-A ubiquitous language is only real if it survives contact with the codebase.
-Part II shows the classes named after these exact terms — no DTO suffixes, no
-numbered variants, no helper classes, and no second word for the same thing.
+Part II shows where these terms appear in the code. Each context has its own
+`CopyId` type to make the context boundary explicit.
 
-## 3. Bounded contexts
+### 3. Bounded contexts
 
-Two groups of people, two sets of concerns, two vocabularies.
+The example separates cataloging and lending because they model different
+concerns:
 
-**Cataloguing** belongs to the staff who maintain the library's holdings. They
-care about what the library *owns*: which works are held, what they are called,
-how many physical items exist, and whether each item is on the shelf. Their world
-changes slowly — a title is corrected once a year, a barcode is printed and stuck
-on once and then never edited.
+**Cataloging** models the library's holdings: which books it records, which
+physical copies belong to them, and whether each copy is available.
 
-**Lending** belongs to the desk staff. They care about *who has what until when*.
-Their world changes hourly, is full of contention and deadlines, and is the only
-place in the library where money moves.
+**Lending** models who has a copy and when it is due. It handles loan
+availability, return dates, and overdue fees.
 
-These are separate bounded contexts for three reasons:
+These concerns suggest separate bounded contexts in this example:
 
-1. **The word "copy" means different things to them.** To cataloguing, a copy is
-   a physical asset with a barcode and a shelf status. To lending, a copy is
-   nothing but an identifier on a loan — lending never scans a barcode and never
-   decides what is on the shelf. Same word, two models. That is the textbook
-   signal for a context boundary.
-2. **They change for different reasons.** A new fee tier is a lending change. A
-   corrected title is a cataloguing change. Neither should be able to break the
-   other, and neither should need the other's release window.
-3. **They would be owned by different teams** in any real library system, and
-   would eventually want different storage and different scaling behaviour.
+1. **The word "copy" means different things to them.** To cataloging, a copy is
+   a physical asset with a barcode and a shelf status. Lending stores only a
+   copy identifier on a loan. The same word appears in both contexts, but each
+   context uses a different model.
+2. **They change for different reasons.** A fee-tier change affects lending; a
+   title correction affects cataloging. Keeping the models separate limits
+   unnecessary dependencies between those changes.
+3. **They could have different owners.** A larger system might assign different
+   teams, storage, or scaling requirements to each context.
 
-A third area — the **shared kernel** — holds only what both sides must agree on:
-the notion of a use case, the notion of a domain failure, and the library's clock.
-It contains no library-domain knowledge whatsoever. If it ever does, one of the
-two contexts has leaked into it, and the kernel has started its slow slide into
-becoming a third context that nobody owns.
+The `library.shared` package contains cross-cutting technical types, including
+the `@UseCase` stereotype, `DomainException`, and the clock producer. It is a
+shared technical package, not a DDD shared kernel: it doesn't contain a shared
+part of the cataloging or lending domain model.
 
-## 4. Context map
+### 4. Context map
 
-Two relationships, running in opposite directions. Getting the direction right is
-the whole game; getting it wrong produces a ball of mud that nobody can split
-later.
+The contexts exchange copy identity and loan events in opposite directions.
+These are in-process relationships in this sample, not independently deployed
+services.
 
-**Lending depends on cataloguing for identity.**
+**Lending depends on cataloging for identity.**
 
-Lending must be able to say *which* copy is on loan, so it borrows cataloguing's
-notion of a copy identifier. But it borrows it strictly as a *consumer*: lending
-never invents a copy identifier and never changes one. In DDD terms, lending is
-downstream and conforms to the identity cataloguing publishes.
+Lending must be able to say *which* copy is on loan, so it stores a copy
+identifier. Cataloging owns that identity; lending represents it with its own
+`CopyId` type.
 
-Just as important is what lending refuses to adopt. It has no idea what a barcode
-is, no idea whether a copy is on the shelf, and no ability to change either. It
-knows only that an identifier names a copy. That refusal is what keeps lending
-small, and it is why a change to how barcodes are printed cannot break a loan.
+Lending doesn't model barcodes or update cataloging's availability flag.
 
-**Cataloguing depends on lending for facts.**
+**Cataloging depends on lending for facts.**
 
-Cataloguing must keep the shelf status honest, and the only authority on whether
-a copy is out is lending. So cataloguing *listens*. When lending announces that a
-loan opened, the copy leaves the shelf; when it announces that a loan closed, the
-copy returns. Cataloguing never asks lending a question and never reads lending's
-records.
+Cataloging updates a copy's availability flag when it receives a loan event.
+When lending announces that a loan opened, the listener marks the copy
+unavailable; when lending announces that a loan closed, it marks the copy
+available.
 
-**So the arrows cross.** Cataloguing is downstream of lending for facts, and
-lending is downstream of cataloguing for identity. Neither reaches into the
-other's data; the only thing that crosses the boundary is an announcement. That
-is a healthy map — a bidirectional *data* dependency between two contexts is the
-one you can never untangle, whereas two one-way event and identity flows can each
-be replaced independently.
+`DomainEventListener` is the cataloging class that imports lending event types.
+The contexts don't read each other's database tables, but they do share event
+types. CDI delivers those events synchronously in this application. If you
+deploy the contexts as separate services, design message delivery, retries, and
+consistency guarantees; CDI events don't provide those guarantees.
 
-**One named meeting point.** There is exactly one place in cataloguing that ever
-looks at a lending concept, and it is the place that reacts to lending's
-announcements. Everything else in cataloguing has never heard of lending. Part II
-shows how that is enforced mechanically, rather than left to goodwill and code
-review.
+### 5. What the strategy commits us to
 
-**A consequence worth stating.** Because shelf status is derived from lending's
-announcements rather than written by lending, it is a *read model*: eventually
-consistent, and permitted to lag by the time an announcement takes to arrive. The
-authority on whether a copy may be lent stays with lending. Two contexts, one
-fact, one owner.
+These design choices guide the implementation:
 
-## 5. What the strategy commits us to
-
-Six decisions, taken before a single line of code:
-
-1. **Three subdomains.** Lending is core and gets the modelling effort.
-   Cataloguing is supporting and stays simple. Bibliographic lookup is generic
-   and is never implemented, only integrated.
-2. **Two bounded contexts and one shared kernel.** Cataloguing and lending share
-   no data — only identifiers and announcements.
-3. **One ubiquitous language per context.** "Copy" deliberately means two
-   different things, and nothing translates between them except the named
-   meeting point.
-4. **A context map that runs both ways.** Lending conforms to cataloguing's
-   identities; cataloguing subscribes to lending's facts. Exactly one class in
-   cataloguing knows lending exists.
-5. **Shelf status is cataloguing's read model** of lending's decisions, and is
-   allowed to lag.
-6. **The generic subdomain sits behind a boundary cataloguing owns**, so the
+1. **Three subdomains.** In this example, lending is core, cataloging is
+   supporting, and bibliographic lookup is generic.
+2. **Two bounded contexts and a shared technical package.** Cataloging and
+   lending use separate models and exchange identifiers and announcements.
+3. **One language per context.** Cataloging models a physical copy; lending
+   refers to that copy by an identifier.
+4. **A context map with explicit dependencies.** Lending stores copy identities;
+   cataloging subscribes to lending's events. `DomainEventListener` owns the
+   event dependency in cataloging.
+5. **Cataloging updates shelf status** when it receives a lending event.
+6. **The generic subdomain sits behind a boundary cataloging owns**, so the
    provider can be swapped or bought without touching the model.
 
-Part I stops here. Which concepts are entities, which are values, where the
-aggregate boundaries fall, how things are stored and retrieved, and what crosses
-the boundary as an event — those are tactical questions, and Part II answers them
-in code.
+Part II applies these choices to entities, value objects, aggregate boundaries,
+repositories, and domain events.
 
 ---
 
-# Part II — Tactical Design: implementing it with Jakarta EE
+## Part II — Tactical design with Jakarta EE
 
-Tactical design takes the strategic decisions and turns them into classes. The
-building blocks are Evans': **entities**, **value objects**, **aggregate roots**,
-**repositories**, **domain events**, **domain services**, and **application
-services**. The headline is how directly Jakarta EE 11 supplies each one — and
-Jakarta Data, new in this release, is the piece that removes the most code.
+Tactical design represents the domain model in code. The example uses entities,
+value objects, aggregates, repositories, domain events, domain services, and
+application services. Jakarta EE supplies infrastructure mechanisms for these
+patterns; Jakarta Data provides the repository API used in this sample.
 
-## From decision to code
+### From design decisions to code
 
-Every commitment taken in Part I §5 lands somewhere specific. This is the map for
-the rest of the part:
+The following table maps the design choices from Part I to their implementation:
 
 | Strategic commitment | Where it lands | Mechanism |
-|---|---|---|
-| 1. Generic subdomain stays replaceable | `BookSearchService` → `OpenLibraryBookSearchService` | Domain port + CDI adapter; swapping providers touches one class |
-| 2. Two contexts, no shared data | `library.catalog..` / `library.lending..` | Packages as modules + ArchUnit rules 6 & 7 |
-| 3. One ubiquitous language per context | `catalog.domain.CopyId` vs `lending.domain.CopyId` | Two types, same shape; lending's cannot mint its own |
-| 4. Exactly one named meeting point | `DomainEventListener` | The single class whitelisted by ArchUnit rule 7 |
-| 5. Shelf status is a read model | `Copy.available` | `@Observes` on a CDI `Event<T>` |
-| 6. The generic sits behind a boundary | `library.catalog.infrastructure` | ArchUnit rule 3: application never imports infrastructure |
+| --- | --- | --- |
+| 1. Keep bibliographic lookup replaceable | `BookSearchService` → `OpenLibraryBookSearchService` | Domain port and CDI adapter |
+| 2. Keep the contexts' models separate | `library.catalog..` / `library.lending..` | Package boundaries enforced by ArchUnit rules 6 and 7 |
+| 3. Use a context-specific copy identifier | `catalog.domain.CopyId` and `lending.domain.CopyId` | Separate types; lending consumes the catalog identity |
+| 4. Keep event coupling in one place | `DomainEventListener` | ArchUnit rule 7 allows this dependency |
+| 5. Update shelf status from loan events | `Copy.available` | CDI observer methods handle `LoanCreated` and `LoanClosed` |
+| 6. Keep the external adapter out of application code | `library.catalog.infrastructure` | ArchUnit rule 3 prevents application-to-infrastructure dependencies |
 
 And the tactical building blocks themselves:
 
 | Building block | In this sample | Jakarta EE mechanism |
-|---|---|---|
+| --- | --- | --- |
 | Entity / aggregate root | `Book`, `Copy`, `Loan` | JPA `@Entity`, `@EmbeddedId`, `@Version` |
 | Value object | `Isbn`, `BarCode`, every `*Id` | Java `record` + `@Embeddable` |
 | Repository | `BookRepository`, `CopyRepository`, `LoanRepository` | **Jakarta Data** `@Repository` + `CrudRepository` |
 | Domain event | `LoanCreated`, `LoanClosed` | **CDI** `Event<T>` / `@Observes` |
-| Domain service | `CopyAvailabilityValidator`, `BookSearchService` | CDI bean / plain domain interface |
+| Domain service / port | `CopyAvailabilityValidator`, `BookSearchService` | CDI bean / domain-facing interface |
 | Application service | the four `*UseCase` classes | `@UseCase` stereotype |
 | Transaction & rollback | every use case | JTA `@Transactional` + unchecked `DomainException` |
 | Adapter | `OpenLibraryBookSearchService` | CDI `@ApplicationScoped` + JAX-RS `Client` |
@@ -459,100 +433,86 @@ And the tactical building blocks themselves:
 | Persistence config | `defaultPU` → `java:comp/DefaultDataSource` | `persistence.xml`, JTA datasource |
 | Bean discovery | interceptor registration | `beans.xml` 4.0 |
 
-The building blocks in the second table each get a section below.
+The building blocks in the second table each get a section in Part II.
 
-## 1. Entities, value objects and aggregate roots ↔ JPA
+### 1. Entities, value objects, and aggregate roots with JPA
 
-### Which concepts are entities, and which are values
+#### Which concepts are entities and which are values
 
-The test is one sentence: **if two things have exactly the same attributes, are
-they the same thing?** If yes, it is a value. If no — if we track it individually
-through time — it is an entity.
+Ask whether the model needs to distinguish two instances that have the same
+attributes. If not, they can be values. If the model tracks each instance
+separately as it changes, it is an entity.
 
-**Entities.** Three of them, matching the three aggregates the event storm
-identified.
+**Entities.** The model has three entity types, each serving as an aggregate
+root:
 
-- **Book** — the catalogue entry for a work. We correct its title, we keep it for
-  decades, and we mean *that entry* even as its attributes change. Two books that
-  happen to share a title are not the same book.
-- **Copy** — the clearest entity in the system, and the reason the model works at
-  all. The library may hold four copies of the same book, with identical titles
-  and identical ISBNs. They are four different things: one can be on the shelf
-  while another is three weeks overdue. If a copy were a value, the library could
-  not lend.
-- **Loan** — a fact with a life of its own. It opens, it stays open, it closes,
-  and it may accrue a fee. Two loans of the same copy by the same borrower a year
-  apart are unambiguously two loans — and we need both, because both charged a
-  fee.
+- **Book** — a catalog record for a book edition. Its identity remains the
+  same if the title or other details change.
+- **Copy** — a physical item with its own identity and barcode. A library can
+  hold several copies of one book; each copy has its own availability.
+- **Loan** — a record with its own lifecycle. It opens, remains open until the
+  copy is returned, and stores its return date and any overdue fee.
 
-**Value objects.** Everything else.
+**Value objects.** The model represents the following concepts as values:
 
-- **ISBN** and **BarCode** — two identical ISBNs are the same ISBN. You never
-  update one; you replace it. Losing the barcode label does not lose the item.
-- **Every identifier** — of a book, a copy, a borrower, a loan. Treating an
-  identifier as a thing-in-itself is precisely how "the id" escapes the model and
-  ends up printed on every screen, report, and API, where it can never be changed
-  again.
-- **A bibliographic lookup result** — a snapshot, true at the instant it was
-  fetched, used once, discarded. If the publisher corrects the title tomorrow, our
-  snapshot does not change, and should not.
-- **A fee tier** — "one to seven days late costs five" is a rule, not a thing.
-- **The announcements themselves** — that a loan opened, that a loan closed. An
-  event already happened, cannot be amended, and two announcements of the same
-  fact are the same announcement.
+- **ISBN** and **BarCode** — immutable values that identify a book edition and a
+  physical copy.
+- **Identifiers** — values used to refer to books, copies, borrowers, and loans.
+- **A bibliographic lookup result** — a snapshot of the information returned by
+  the external service.
+- **A fee tier** — a value representing the amount charged for a range of
+  overdue days.
+- **Loan events** — immutable records of facts such as a loan opening or closing.
 
-**The ratio is the point.** Three entities; everything else a value. Systems go
-wrong in the opposite direction — a dozen entities, most of them for things that
-are really just labels — and then every small change requires a migration, every
-read requires a join, and every screen leaks a surrogate key.
+This model uses three entity types and represents several other concepts as
+values. This is a choice for the example, not a general target ratio for DDD
+models.
 
-### Aggregate boundaries
+#### Aggregate boundaries
 
-An aggregate is a consistency boundary: a cluster of concepts that must be
-updated atomically, guarded by one root. Inside it, invariants hold at all times.
-Across boundaries, they hold *eventually*.
+An aggregate is a consistency boundary with one root. The root protects the
+aggregate's invariants when the application changes its state. Invariants that
+cross aggregate boundaries need a separate consistency strategy.
 
-The critical decision is what is **not** inside them.
+In this example, the boundaries exclude related objects:
 
-**A copy does not contain its book.** A popular title may have four hundred
-copies. If the book aggregate contained them all, correcting one title would mean
-loading and re-saving four hundred items, and two librarians registering copies at
-the same moment would collide on the same book. Instead a copy *refers to* its
-book. Registering copy number 401 cannot corrupt the catalogue entry.
+**A copy does not contain its book.** A copy stores the book's identifier. This
+keeps copy registration and book updates in separate aggregates.
 
 **A loan does not contain a copy or a borrower.** A loan is a lending fact. It
-names the copy; it does not own it. Lending physically cannot alter a barcode or a
-shelf status, because it does not have them.
+stores the copy and borrower identifiers. Lending doesn't own the cataloging
+copy or update its barcode.
 
-So the rule across the entire domain:
+The example follows this rule:
 
 > **Aggregates refer to each other by identity, never by containment.**
 
-The payoff is that every transaction touches exactly one aggregate — which is what
-makes scenario 3.3 (two borrowers, one copy, one winner) solvable at all, rather
-than a race condition papered over with a retry loop.
+Keeping aggregate references as identifiers helps transactions update one
+aggregate at a time. It doesn't by itself enforce cross-aggregate invariants such
+as allowing only one open loan per copy.
 
-### Invariants, and who guards each one
+#### Invariants and their guards
 
-| Invariant | Guarded by | Immediately? |
-|---|---|---|
-| An ISBN must be structurally valid | The ISBN itself — an invalid one cannot exist | yes |
-| No duplicate book in the catalogue | Adding a book, which checks first | yes |
-| A copy must belong to a book and carry a barcode | Registering a copy | yes |
-| At most one open loan per copy | Lending a copy | yes |
-| The due date is thirty days out | Opening a loan | yes |
-| The fee tier follows the days late | Closing a loan | yes |
-| Shelf status matches loan state | Cataloguing, on hearing an announcement | **eventually** |
+| Invariant | Guarded by | Current behavior |
+| --- | --- | --- |
+| An ISBN must be structurally valid | `Isbn` constructor | Enforced |
+| No duplicate book in the catalog | `AddBookToCatalogUseCase` checks before adding | Checked before each add |
+| A copy must have a book ID and barcode | `Copy` constructor | Enforced |
+| A copy's book ID must identify a cataloged book | Not enforced in the current code | Not enforced |
+| At most one open loan per copy | Availability check before lending | Checked for sequential requests; concurrency isn't tested |
+| The due date is thirty days out | `Loan` constructor | Enforced |
+| The fee tier follows the days late | `Loan.returned` | Enforced |
+| Shelf status matches loan state | Synchronous CDI observer | Updated in the application transaction |
 
-The first six live inside a single aggregate, so they hold unconditionally. The
-seventh spans two contexts, which means it *cannot* live in either aggregate — so
-it is eventually consistent by design, per Part I §4. A briefly-stale shelf flag
-costs a librarian one refresh; merging the contexts to make it instantaneous would
-cost the library its ability to ever run them separately.
+The table distinguishes checks the current implementation performs from a
+requirement it doesn't enforce. The availability check prevents a second loan
+for sequential requests; the sample doesn't include a concurrent-rental test.
+The synchronous CDI observer updates shelf status in the same application
+transaction. Separate services would need a different consistency strategy.
 
-### How this becomes JPA
+#### Map the model with JPA
 
-The mapping is almost invisible, because value objects do the work.
+Value objects keep the entity mapping focused on the domain model:
 
 ```java
 @Entity
@@ -564,7 +524,7 @@ public class Book {
     @AttributeOverride(name = "value", column = @Column(name = "isbn"))
     private Isbn isbn;
 
-    Book() { }                       // package-private: JPA only
+    Book() { }
 
     public Book(String title, Isbn isbn) {
         Objects.requireNonNull(title, "title must not be null");
@@ -588,8 +548,11 @@ public class Book {
 
 The details that matter:
 
-- **The no-arg constructor is package-private.** JPA needs it; application code
-  cannot reach it. Cheapest possible guard against half-built aggregates.
+- **The no-arg constructor is package-private in this sample.** The Jakarta
+  Persistence specification requires a public or protected no-arg constructor
+  for an entity. Although the providers used by this project accept the
+  package-private constructor, use `protected` if you want to follow the
+  specification and improve portability.
 - **`equals`/`hashCode` compare identity only.** `Book` does not compare title
   or ISBN. That is what "entity" means, and getting it wrong is a classic
   source of `Set` corruption in JPA.
@@ -600,13 +563,12 @@ The details that matter:
   type appears twice (`Loan` holds both a `CopyId` and a `UserId`, and both
   records wrap a field named `id`).
 
-Records work as `@Embeddable` value objects against both providers the project
-tests on — EclipseLink 5.0.2 (GlassFish) and Hibernate 7.4 (WildFly Preview) —
-from the same source.
+Records work as `@Embeddable` value objects with the providers tested by this
+project: EclipseLink 5.0.2 (GlassFish) and Hibernate 7.4 (WildFly Preview).
 
-## 2. Repository ↔ Jakarta Data
+### 2. Repositories with Jakarta Data
 
-This is the part that changed most with Jakarta EE 11.
+Jakarta Data provides repository interfaces that a Jakarta EE runtime implements.
 
 **The entire persistence layer for the catalog context:**
 
@@ -646,22 +608,22 @@ interface like any other CDI bean:
 @Inject private BookRepository bookRepository;
 ```
 
-### Who actually implements it — and it is not the same answer twice
+#### How the runtimes implement the repository
 
-This is the part that is easy to get wrong, so it is worth being blunt:
+The distinction between the API and its implementation is important:
 
 > **Jakarta Data is a specification, not a library.** There is no
 > `jakarta-data-impl.jar` you add to your POM. `jakarta.jakartaee-api` is
 > `<scope>provided</scope>` — it hands you the annotations and interfaces at
 > compile time and nothing else. The implementation is supplied by the
-> **runtime**, which means the same four-line interface is realised by two
+> **runtime**, which means the same four-line interface is realized by two
 > completely different mechanisms depending on which server you deploy to.
 
 This project is wired to demonstrate exactly that. The POM swaps the annotation
 processor per profile:
 
 | Profile | Server | Persistence provider | `annotationProcessorPaths` |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | *(default)* `glassfish` | GlassFish 8.0.5 | EclipseLink 5.0.2 | `org.eclipse.persistence:org.eclipse.persistence.jpa.modelgen.processor` |
 | `wildfly` | WildFly Preview 41.0.1.Final | Hibernate 7.4.11.Final | `org.hibernate.orm:hibernate-processor` |
 
@@ -776,15 +738,14 @@ Seven things in that output are worth noticing:
 6. **Pagination is already implemented.** `findAll(PageRequest, Order)` builds a
    criteria query, applies sorts via `SelectionSpecification`, counts only when
    `pageRequest.requestTotal()` asks it to, and returns a `PageRecord`.
-7. **Your `default` methods come along for free.** Because the generated class
-   *implements* the interface, `LoanRepository.findByIdOrThrow` is simply
-   inherited — the processor emits nothing for it. Domain-flavoured conveniences
-   cost zero codegen.
+7. **Default methods remain available.** The generated class implements the
+   interface, so it inherits `LoanRepository.findByIdOrThrow` without generated
+   code.
 
-### The trade-off, honestly
+#### Compare the implementation approaches
 
-| | Compile-time codegen (Hibernate / WildFly) | Runtime reflection (EclipseLink / GlassFish) |
-|---|---|---|
+| Aspect | Compile-time code generation (Hibernate / WildFly) | Runtime reflection (EclipseLink / GlassFish) |
+| --- | --- | --- |
 | Implementation | a `.java`/`.class` you can read and step into | an opaque proxy |
 | Build requirement | processor on `annotationProcessorPaths` | nothing extra |
 | Deployment cost | none — the class already exists | reflection and proxy construction at deploy |
@@ -792,27 +753,24 @@ Seven things in that output are worth noticing:
 | Provider coupling | generated class imports `org.hibernate.StatelessSession` | none in your build output |
 | Where problems surface | at compile/deploy, earlier | at deploy or first invocation |
 
-The coupling row deserves emphasis: `BookRepository_` is thoroughly
-Hibernate-specific. **Your `BookRepository` is not.** The domain layer only ever
-names the interface and never sees the generated class, which is precisely why
-the identical source tree deploys to both servers and why the two CI profiles are
-worth running. The port stays clean; only the adapter changes, and the adapter is
-somebody else's problem.
+The coupling row matters: `BookRepository_` is Hibernate-specific, but
+`BookRepository` isn't. The application depends on the interface, while each
+runtime supplies its own implementation. The project tests the same source tree
+with both servers.
 
 Two practical consequences:
 
 - If you build with the WildFly profile and then deploy that WAR to GlassFish,
   you ship Hibernate-specific generated classes into an EclipseLink runtime.
   Build per target, or keep the generated sources out of the artifact.
-- `@jakarta.transaction.Transactional` is emitted on the generated class anyway,
-  so putting it on the interface (as this sample does) is belt-and-braces rather
-  than load-bearing on Hibernate — but it *is* load-bearing on EclipseLink, where
-  nothing is generated. Keep it.
+- The Hibernate processor emits `@Transactional` on the generated class. The
+  interface annotation also applies when EclipseLink supplies its runtime
+  implementation.
 
-### What this replaced
+#### Replace a hand-written repository
 
-Every Jakarta EE DDD project before Jakarta Data 1.0 wrote this by hand, in the
-infrastructure layer:
+Without a repository implementation supplied by the runtime, a project can write
+an adapter like this:
 
 ```java
 // the file you no longer need
@@ -838,12 +796,11 @@ public class JpaBookRepository implements BookRepository {
 }
 ```
 
-Every one of those classes was pure translation — no domain logic, no business
-value, just ceremony. Worse, the port and its adapter were two files that could
-drift apart silently. Jakarta Data collapses them into one artifact that cannot
-disagree with itself.
+This implementation translates repository calls into JPA operations. Jakarta
+Data removes the need to maintain that adapter in this sample, while the
+repository interface remains part of the application contract.
 
-### Three techniques worth stealing
+#### Practical repository patterns
 
 **a) `@Query` returns the domain's type, not the database's.**
 
@@ -880,7 +837,7 @@ Because it is unchecked, throwing it out of a `@Transactional` use case rolls th
 transaction back automatically — no `@ApplicationException` needed. That is the
 entire purpose of the base class: callers react to typed failures instead of
 parsing `Optional.empty()` or catching a generic `NoSuchElementException`. And
-it costs zero infrastructure — it is an interface default method.
+it needs no separate implementation — it is an interface default method.
 
 **c) The repository interface lives in `..domain..`.**
 
@@ -901,62 +858,50 @@ void repositoryContractsMustResideInDomainLayer() {
 }
 ```
 
-### Why `@Transactional` sits on the interface
+#### Why `@Transactional` appears on the interface
 
-It makes each repository method safe to call standalone, and when called from
-inside an already-active use-case transaction it simply joins it (the default
-`REQUIRED` behaviour). Your use case still owns the boundary — `RentBookUseCase`
-saves the loan and fires the event atomically — but the repository does not
-explode if someone injects it into a JAX-RS resource or a test without wrapping
-it first.
+The annotation makes each repository method transactional when called on its
+own. Inside an active use-case transaction, the default `REQUIRED` behavior joins
+that transaction. The use case still coordinates the loan save and event; the
+repository can also be called from another transactional component.
 
-### Where Jakarta Data goes next
+#### Other Jakarta Data repository options
 
-The sample only uses `CrudRepository`. The spec has more when you need it:
-`BasicRepository` adds batch operations, `DataRepository` lets you define an
-entirely custom contract, derived query methods
-(`findByTitleContainingIgnoreCase` and friends) cover ad-hoc finders without
-writing JPQL, and `Page`/`Sort`/`CursoredPage` handle the listing and pagination
-every real application eventually grows. When `OverdueFee` graduates from an
-enum to a table so staff can adjust rates without a redeploy, its repository is
-another four-line interface.
+The sample uses `CrudRepository`. Jakarta Data also defines `BasicRepository`
+for common save, delete, and retrieval operations, and `DataRepository` as a
+base for custom repository interfaces. It also supports derived query methods
+and pagination types such as `Page`, `PageRequest`, `Order`, and
+`CursoredPage`. Add these features when the application needs them. For example,
+storing configurable fee tiers would require a persistence model and repository;
+the current sample keeps fee tiers in code.
 
-## 3. Domain events ↔ CDI events
+### 3. Domain events with CDI events
 
-### What the events are
+#### Events in this example
 
-The storm produced two facts that somebody else cares about:
+The model emits two events that cataloging uses:
 
 - **A loan was opened.** Carries: which copy.
 - **A loan was closed.** Carries: which copy.
 
-Both carry exactly one thing, because that is all cataloguing needs in order to
-update a shelf status. Not the borrower, not the due date, not the fee. The more
-an announcement carries, the more its listeners come to depend on, and the harder
-it becomes to change anything. **An event payload should be the minimum that lets
-a subscriber act.**
+Both carry the copy identifier that cataloging needs to update availability.
+Keeping the payload focused limits what subscribers depend on.
 
-A third fact is recognised but not yet announced: **an overdue fee was charged.**
-Today the fee is simply recorded on the loan and nobody is told. The moment
-billing, member notifications, or fee waivers become requirements, that fact needs
-an audience — and it should become an announcement, not a call from lending into
-some billing module that lending then has to know about.
+A third fact, an overdue fee calculation, is recorded on the loan but isn't
+published as an event. If billing or notifications need to react to it, the
+design could add an event and a subscriber.
 
-**Why announcements rather than direct calls.** When a borrower takes a copy,
-lending's job is to open a loan. It is not lending's job to know that cataloguing
-keeps a shelf flag, that a future search index needs re-indexing, or that a
-monthly report counts loans per day. Lending states what happened and moves on;
-everyone else decides for themselves whether they care. This is precisely what
-allows the two contexts to be split into separate services later without rewriting
-either one.
+Events let lending publish a fact without calling cataloging directly. In this
+sample, CDI observers deliver that fact inside the same application. Moving the
+contexts into separate services would require a messaging adapter and decisions
+about delivery guarantees and transaction boundaries.
 
-### How they become CDI events
+#### Publish and observe CDI events
 
-Jakarta EE has had a synchronous, type-safe, transaction-aware event bus since
-CDI 1.0. It is a perfectly good domain event mechanism, and the sample uses it
-directly — no framework, no outbox table, no broker.
+CDI provides synchronous, type-safe events. This sample uses them directly; it
+doesn't use a broker or an outbox.
 
-The two events are records, because an event is a value object:
+The events are immutable records:
 
 ```java
 public record LoanCreated(CopyId copyId) { }
@@ -973,7 +918,7 @@ public class RentBookUseCase {
     private final Event<LoanCreated> loanCreatedEvent;
     private final Clock clock;
 
-    public RentBookUseCase() { }                   // required by the CDI spec
+    public RentBookUseCase() { }
 
     @Inject
     public RentBookUseCase(LoanRepository loanRepository,
@@ -984,14 +929,14 @@ public class RentBookUseCase {
     public void execute(CopyId copyId, UserId userId) {
         copyAvailabilityValidator.checkAvailable(copyId);
         var now = LocalDateTime.now(clock);
-        loanRepository.save(new Loan(copyId, userId, now, LocalDate.now(clock).plusDays(30)));
+        loanRepository.save(new Loan(copyId, userId, now));
 
         loanCreatedEvent.fire(new LoanCreated(copyId));
     }
 }
 ```
 
-The subscriber declares a parameter:
+The subscriber declares observer methods:
 
 ```java
 @ApplicationScoped
@@ -1002,56 +947,51 @@ public class DomainEventListener {
 }
 ```
 
-The properties that make this work as a DDD event mechanism:
+This approach has several useful properties:
 
-- **Synchronous by default.** The observer runs inside the firing transaction, so
-  the loan and the availability change commit together or not at all. No
-  half-applied state.
+- **Synchronous by default.** The observer runs while the event is fired. In
+  this sample, it updates availability within the use-case transaction.
 - **Type-safe and compile-checked.** `Event<LoanCreated>` cannot fire a
   `LoanClosed` by accident; a string topic name can.
 - **The publisher knows nothing about subscribers.** `RentBookUseCase` has no
   import from `library.catalog`. Add a second listener — audit log, search index,
   metrics — and the lending context does not change.
-- **Swapping to `@ObservesAsync` or a real broker is a local change.** The event
-  records and the `fire()` calls stay identical.
+- **Changing delivery requires design work.** An asynchronous observer or
+  message broker changes delivery and transaction behavior; the publisher and
+  event contract may also need an adapter.
 
-The `execute` body is four lines of orchestration: validate, construct the
-aggregate, persist through the repository, announce what happened. No
-transaction demarcation, no logging, no lifecycle code.
+The `execute` method validates availability, creates and persists a loan, and
+publishes the event. The `@UseCase` stereotype supplies the transaction and
+logging behavior.
 
-## 4. Domain services and application services ↔ CDI
+### 4. Domain and application services with CDI
 
-Two building blocks that are easy to conflate, and worth separating before
-looking at code.
+Domain services and application services have different responsibilities.
 
-An **application service** is the outside world's handle on the domain. It
-carries no business rules of its own — it starts a transaction, asks the domain
-to do something, persists the result, and announces what happened. There is one
-per use case from Part 0, and nothing else.
+An **application service** coordinates a use case. In this sample, it starts a
+transaction, invokes domain behavior, persists the result, and publishes events.
 
-A **domain service** holds a rule that does not belong to any single aggregate.
-The classic case is a rule that needs to consult more than one aggregate, or a
-capability the domain needs but cannot provide itself.
+A **domain service** implements domain behavior that doesn't belong naturally
+to one entity or value object. A **port** is different: it's an interface the
+domain declares for a capability supplied from outside the model. An adapter
+implements that interface.
 
-This sample has both, and one interesting judgement call:
+The sample includes both types of service:
 
 | Class | Kind | Why |
-|---|---|---|
+| --- | --- | --- |
 | `AddBookToCatalogUseCase`, `RegisterBookCopyUseCase`, `RentBookUseCase`, `ReturnBookUseCase` | Application service | One per journey; pure orchestration |
-| `CopyAvailabilityValidator` | **Domain service** | "At most one open loan per copy" is a rule, not orchestration — and it cannot live inside `Loan`, because a single loan cannot see the other loans against the same copy |
-| `BookSearchService` | Domain service *port* | A capability the domain needs but cannot provide; the generic subdomain from Part I §1 |
+| `CopyAvailabilityValidator` | **Domain service** | Checks whether another open loan exists for the copy |
+| `BookSearchService` | Domain-facing port | Provides the cataloging model with book information from an external source |
 
-The judgement call: `CopyAvailabilityValidator` is a domain rule, yet it sits in
-`library.lending.application`, not `library.lending.domain`. Defensible either
-way — it is invoked only from an application service and depends on a repository
-— but if the availability rule ever grows (reservations, hold queues, per-member
-limits) it belongs in the domain package, and the ArchUnit rules would not object
-to moving it.
+`CopyAvailabilityValidator` resides in `library.lending.domain` and uses the
+`LoanRepository` port to check the rule. `BookSearchService` resides in
+`library.catalog.domain`; its infrastructure adapter calls the external service.
 
-### 4.1 Application services ↔ the `@UseCase` stereotype
+#### 4.1 Application services and the `@UseCase` stereotype
 
-Every use case is annotated `@UseCase`, a CDI stereotype bundling three
-annotations into one:
+Each use case uses the `@UseCase` CDI stereotype, which combines transaction,
+scope, and logging annotations:
 
 ```java
 @Target(ElementType.TYPE)
@@ -1064,10 +1004,9 @@ annotations into one:
 public @interface UseCase { }
 ```
 
-Read it as a *definition* of what a use case is in this application: a singleton,
-running in a transaction, with entry/exit/exception logging applied by an
-interceptor. The logging is a plain CDI interceptor bound by `@Logged` and
-registered in `beans.xml`:
+In this application, `@UseCase` gives each use case application scope and a
+transaction. The `@Logged` interceptor adds entry, exit, and exception logging.
+The interceptor is registered in `beans.xml`:
 
 ```xml
 <interceptors>
@@ -1075,17 +1014,15 @@ registered in `beans.xml`:
 </interceptors>
 ```
 
-Stereotypes are underrated. Without one, every application service repeats three
-annotations and inevitably forgets one — usually `@Transactional`, which fails at
-runtime rather than at compile time. With one, "this class is a use case" is a
-single, greppable, enforceable fact.
+The stereotype keeps these annotations consistent across use cases and gives the
+architecture tests a single annotation to check.
 
-### 4.2 Domain services ↔ a CDI bean that owns a cross-aggregate rule
+#### 4.2 Domain services and cross-aggregate rules
 
-"At most one open loan per copy" (scenario 3.2) is a genuine domain rule, but it
-cannot live inside `Loan`: a single loan has no way to see the *other* loans
-against the same copy. A rule that must consult more than one instance is exactly
-what a domain service is for.
+"At most one open loan per copy" (scenario 3.2) depends on other loans for the
+same copy, so `Loan` cannot check it by inspecting only its own state. The
+`CopyAvailabilityValidator` domain service uses the repository to check for an
+existing open loan.
 
 ```java
 @ApplicationScoped
@@ -1107,15 +1044,14 @@ public class CopyAvailabilityValidator {
 }
 ```
 
-One method, one rule, one reason to change. It reads the invariant straight out
-of Part 0 — `isAvailable` is the Jakarta Data `@Query` from §2 — and it fails in
-domain terms with `CopyNotAvailableException`, which as an unchecked
-`DomainException` rolls the use case's transaction back.
+The validator raises `CopyNotAvailableException` when the repository reports
+that the copy is unavailable. The exception extends the unchecked
+`DomainException` base class.
 
-### 4.3 Ports and adapters ↔ CDI + JAX-RS client
+#### 4.3 Ports and adapters with CDI and the JAX-RS client
 
-Journey J1 needs a title for an ISBN, resolved from an external service — the
-generic subdomain from Part I §1. The domain declares the need:
+Journey J1 needs to resolve an ISBN to a title. The cataloging domain declares
+the capability it needs:
 
 ```java
 // library.catalog.domain — the port
@@ -1124,8 +1060,8 @@ public interface BookSearchService {
 }
 ```
 
-No `jakarta.ws.rs` import, no `Client`, no status codes, no JSON. The adapter
-supplies all of it:
+The interface doesn't expose HTTP or JSON details. The infrastructure adapter
+handles those details:
 
 ```java
 // library.catalog.infrastructure — the adapter
@@ -1151,37 +1087,35 @@ public class OpenLibraryBookSearchService implements BookSearchService {
 }
 ```
 
-The adapter's real job is **translation**: 404 → `BookNotFoundException`,
-500 → `BookSearchException`, connection reset → `BookSearchException` wrapping
-the cause. Wire-level concerns stop at the boundary; `AddBookToCatalogUseCase`
-only ever sees domain exceptions.
+The adapter translates HTTP failures into domain exceptions: a 404 becomes
+`BookNotFoundException`; other unsuccessful responses and connection failures
+become `BookSearchException`. `AddBookToCatalogUseCase` handles domain
+exceptions rather than HTTP status codes.
 
-(It also follows Open Library's 302 to `/books/{key}.json` manually, because the
-JAX-RS client will not, and keeps `requestUri` around so a relative `Location`
-header can be resolved against it. Real adapters are messy. That mess is exactly
-what belongs in the infrastructure layer and nowhere else.)
+The adapter also follows Open Library's redirect to `/books/{key}.json` and
+resolves relative `Location` headers against the request URI. These HTTP details
+stay in the infrastructure layer.
 
 Because the constructor accepts a base URL, the adapter is testable without a
 network — which is what the WireMock tests exploit in Part III.
 
-## 5. Cohesion in classes, decoupling between them
+### 5. Cohesion and decoupling
 
-Two principles, applied consistently, produce most of the readability in this
-codebase.
+The sample uses cohesion and explicit dependencies to keep classes focused and
+the application easier to test.
 
 **Cohesion — every class has one reason to change.**
 
 | Class | Its single job |
-|---|---|
+| --- | --- |
 | `CopyAvailabilityValidator` | One method: decide whether a copy may be lent |
 | `DomainEventListener` | React to other contexts' events |
 | `OpenLibraryBookSearchService` | Translate HTTP into domain terms |
 | `ClockProducer` | Supply the system clock |
 | `RentBookUseCase` | Orchestrate one business transaction |
 
-Nothing here is a 600-line service. No `execute` method in the sample exceeds
-four statements, and every one of them reads as a sequence of domain operations
-rather than as plumbing.
+The use cases coordinate domain operations instead of combining them with HTTP
+or persistence-provider details.
 
 **Decoupling — dependencies point inward and are declared, not discovered.**
 
@@ -1193,22 +1127,22 @@ rather than as plumbing.
   `BookSearchService` interface. `OpenLibraryBookSearchService` depends on the
   same interface. Neither knows the other exists; CDI wires them. ArchUnit fails
   the build if `application` ever imports `infrastructure`.
-- **Identity references instead of object references** (§1 above), so
+- **Identity references instead of object references** (see Part II §1), so
   aggregates cannot reach into each other.
-- **Package-private constructors** as access control — `Book()`, `Copy()`,
-  `Loan()`, and the use cases' CDI-mandated no-arg constructors are all invisible
-  outside their package.
+- **Constructor visibility.** The entity no-arg constructors are package-private
+  in this sample; use protected constructors to meet the Jakarta Persistence
+  requirement. Use cases inject their dependencies through constructors.
 - **Unchecked domain exceptions** mean callers are not forced to catch what they
   cannot handle, and the container still rolls back.
 
-## 6. Modules and ArchUnit: making the structure stick
+### 6. Packages and ArchUnit rules
 
-The two bounded contexts and the shared kernel from Part I become three top-level
-packages, each with the same three-layer shape:
+The two bounded contexts and the shared technical package from Part I map to
+three top-level packages:
 
 ```
 library
-├── shared                    shared kernel — depends on neither context
+├── shared                    shared technical types — depends on neither context
 │   ├── UseCase               stereotype: @ApplicationScoped + @Transactional + @Logged
 │   ├── Logged / LoggedInterceptor
 │   ├── DomainException       base type for every domain failure
@@ -1218,31 +1152,31 @@ library
 │   ├── domain                Book, Copy, BookRepository, CopyRepository, BookSearchService (port)
 │   └── infrastructure        OpenLibraryBookSearchService (adapter)
 └── lending
-    ├── application           RentBookUseCase, ReturnBookUseCase, CopyAvailabilityValidator
-    └── domain                Loan, LoanRepository, OverdueFee, LoanCreated, LoanClosed
+    ├── application           RentBookUseCase, ReturnBookUseCase
+    └── domain                Loan, LoanRepository, CopyAvailabilityValidator, OverdueFee, LoanCreated, LoanClosed
 ```
 
-Note what is absent: `lending` has no `infrastructure` package, because it needs
-none — its only external dependency is the database, and Jakarta Data hides that
-completely. There is also no `catalog.infrastructure.BookRepositoryImpl`, the
-file every pre-Jakarta-Data DDD codebase carried.
+The lending context has no infrastructure package in this sample. Its repository
+interface is implemented by the Jakarta Data runtime; the application still
+requires persistence-provider and datasource configuration. The source tree also
+doesn't contain a hand-written `BookRepository` adapter.
 
-The three "modules" are packages, which means nothing stops anyone from ignoring
-them. So the sample ships **eight ArchUnit rules** that run as ordinary unit
-tests during `mvn package` and fail the build on violation:
+Packages don't enforce module boundaries by themselves. Eight ArchUnit rules run
+as unit tests during `mvn package` and fail the build when a dependency rule is
+violated:
 
 | # | Rule | Enforces |
-|---|---|---|
+| --- | --- | --- |
 | 1 | `..domain..` must not depend on `..application..` or `..infrastructure..` | Layer direction |
-| 2 | `..domain..` must not depend on `jakarta.ws.rs..`, `jakarta.enterprise..`, `jakarta.inject..` | Domain framework-independence |
+| 2 | `..domain..` must not depend on `jakarta.ws.rs..`, `jakarta.enterprise..`, or `jakarta.inject..`, except `CopyAvailabilityValidator` | Domain framework-independence |
 | 3 | `..application..` must not depend on `..infrastructure..` | Dependency inversion |
 | 4 | `..application..` *must* depend on `..domain..` | Application services orchestrate the model |
-| 5 | `library.shared..` must not depend on `catalog..` or `lending..` | Shared kernel neutrality |
+| 5 | `library.shared..` must not depend on `catalog..` or `lending..` | Shared package neutrality |
 | 6 | `library.lending..` must not depend on `library.catalog..` | Context isolation |
 | 7 | `library.catalog..` must not depend on `library.lending..`, except `DomainEventListener` | The one named coupling |
 | 8 | Any `*Repository` must reside in `..domain..` | Repository is a port |
 
-Rule 7 is the interesting one:
+Rule 7 documents the event-listener exception:
 
 ```java
 @Test
@@ -1256,46 +1190,37 @@ void catalogContextMustNotDependOnLendingContextExceptObservedEvents() {
 }
 ```
 
-A blanket ban would be a lie — the contexts *do* communicate. Whitelisting the
-single class where the coupling lives makes the exception visible, named, and
-reviewable, rather than letting it spread. **An architecture rule with a
-documented exception is stronger than a rule with a silent one.**
+The contexts do communicate, so a blanket ban would fail. Whitelisting
+`DomainEventListener` makes the dependency visible and reviewable.
 
-### The compromise hiding in rule 2
+#### The trade-off in rule 2
 
-Look at what is *not* banned: `jakarta.persistence`. `Book`, `Copy`, and `Loan`
-are all `@Entity`; `Isbn` and `BarCode` are `@Embeddable`. The domain model is
-JPA-annotated.
+Rule 2 doesn't ban `jakarta.persistence`. `Book`, `Copy`, and `Loan` use
+`@Entity`; `Isbn` and `BarCode` use `@Embeddable`. The domain model includes JPA
+annotations.
 
-This is a real trade-off and the sample makes it deliberately. The pure
-alternative — a separate persistence model with mappers — costs a parallel class
-hierarchy and a mapping layer that must stay in sync with both. For most teams
-that cost exceeds the benefit, and JPA annotations are declarative metadata
-rather than behaviour: the domain still has no *runtime* dependency on the
-provider, which is why the same WAR runs on EclipseLink and Hibernate.
+This is a trade-off. A separate persistence model and mapper layer would avoid
+JPA annotations in the domain but add types and mapping code. Here, the domain
+depends on the JPA API, but not directly on either persistence provider.
 
-The line drawn here is defensible — the domain must not depend on things that
-*do something to it* (CDI scopes, interceptors, HTTP clients, request/response
-objects); annotations that only describe storage are tolerated. But be honest
-about the price: your aggregates are coupled to your ORM's mapping rules, which
-is why every entity needs that package-private no-arg constructor and why
-`@AttributeOverride` appears in domain classes.
+The rule also allows one exception: `CopyAvailabilityValidator` uses CDI as a
+domain service. The model remains coupled to JPA mapping rules, including
+`@AttributeOverride` and the entity constructor visibility requirement.
 
 ---
 
-# Part III — Proving the requirements: the scenario integration tests
+## Part III — Compare requirements with integration tests
 
-The scenario tests live in `src/test/java/library/it/LibraryIT.java`. (`LibraryIT`
-is the scenario suite; there is no class literally named `ScenarioIT`.) Its job
-is to exercise the use cases end to end, inside a real container, against a real
-database, and show that the Part 0 requirements hold.
+The scenario tests in `src/test/java/library/it/LibraryIT.java` exercise use
+cases in a container with a database. The coverage matrix shows which Part 0
+requirements they verify and which remain untested.
 
-## Coverage matrix
+### Coverage matrix
 
 Every Part 0 scenario, in requirement order:
 
 | Req | Scenario | Proved by | Status |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 1.1 | Invalid ISBN refused | `Isbn` record constructor | ⚠️ no dedicated test |
 | 1.2 | Duplicate ISBN → `BookAlreadyExistsException` | — | ❌ **not covered** |
 | 1.3 | Happy path: ISBN → title → `Book` saved | — | ❌ **not covered** |
@@ -1304,7 +1229,7 @@ Every Part 0 scenario, in requirement order:
 | 1.6 | Network fault → `BookSearchException` | `OpenLibraryBookSearchServiceTest` | ✅ |
 | 2.1 | Register a copy → on the shelf, available | — | ❌ **not covered** |
 | 2.2 | Missing book or barcode refused | `@NotNull` + `Copy` constructor | ⚠️ no dedicated test |
-| 2.R | A copy must belong to a *catalogued* book | — | ❌ **rule not implemented** |
+| 2.R | A copy must belong to a *cataloged* book | — | ❌ **rule not implemented** |
 | 3.1 | Rent an available copy → loan opens, copy leaves the shelf | `LibraryIT.testLibraryCrud` | ✅ |
 | 3.2 | Rent an already-loaned copy → refused | `LibraryIT.testLibraryCrud` | ⚠️ assertion too loose |
 | 3.3 | Two borrowers, one copy, one winner | — | ❌ **not covered** |
@@ -1315,15 +1240,14 @@ Every Part 0 scenario, in requirement order:
 | 5 | All five fee tiers | `OverdueFeeTest` (unit) | ✅ |
 | II §6 | All 8 architecture rules | `ArchitectureTest` | ✅ |
 
-Roughly half the stated requirements are proved, and the lending side — the part
-with the money and the contention — is the better-covered half.
+The matrix shows gaps in the catalog and lending scenarios. The lending tests
+cover more of the fee and availability behavior, but the concurrent-rental
+scenario still needs a test.
 
-### The gaps, stated plainly
+#### Gaps in the current tests and implementation
 
-**Journeys J1 and J2 have no scenario test at all.** `AddBookToCatalogUseCase` and
-`RegisterBookCopyUseCase` are referenced by **no test anywhere** — grep confirms
-they appear only in `src/main`. `LibraryIT` sets up its fixtures by constructing
-aggregates directly:
+**The tests don't exercise the J1 and J2 use cases.** `LibraryIT` creates its
+fixtures by constructing aggregates directly:
 
 ```java
 Book book = new Book("Effective Java", new Isbn("9780134685991"));
@@ -1333,12 +1257,11 @@ Copy copy1 = new Copy(copyId, book.getId(), new BarCode("BC001"));
 copyRepository.save(copy1);
 ```
 
-That is reasonable *fixture* code, but it means the duplicate check, the
-bibliographic lookup, and the save in J1 are never exercised in sequence, and
-J2 is never exercised at all. The search adapter's error translation is well
-covered by WireMock; the use case that orchestrates it is not. These are the
-obvious next tests to write, and the `OpenLibraryBookSearchService(BASE_URL)`
-constructor makes an in-container version straightforward.
+This is reasonable fixture setup, but it doesn't test the full sequence in J1:
+duplicate checking, bibliographic lookup, and saving a book. It also doesn't
+exercise J2 through its use case. WireMock tests cover the search adapter's error
+translation, but not the use case that coordinates it. Add use-case tests with a
+test implementation of `BookSearchService` and repositories in a container.
 
 **Requirement 2.R is stated but not implemented.** `RegisterBookCopyUseCase` does
 this and nothing more:
@@ -1349,17 +1272,17 @@ public void execute(@NotNull BookId bookId, @NotNull BarCode barCode) {
 }
 ```
 
-There is no check that `bookId` names a book in the catalogue. Registering a copy
+There is no check that `bookId` names a book in the catalog. Registering a copy
 against a book that does not exist succeeds, and because aggregates reference each
-other by identity with no foreign key (Part II §1), nothing else will catch it
+other by identity with no foreign key (see Part II §1), nothing else will catch it
 either. This is a genuine gap between the stated requirement and the code — either
 the rule should be enforced with a `bookRepository.existsById(bookId)` check, or
 the domain expert should confirm that a copy may legitimately precede its
-catalogue entry. It is a conversation, not a silent fix.
+catalog entry. It is a conversation, not a silent fix.
 
-**Requirement 3.3 is asserted nowhere.** `@Version` is on `Copy`, so the mechanism
-exists, but no test races two rentals. Optimistic locking that is never tested
-tends to be discovered in production.
+**Requirement 3.3 has no test.** `Copy` has an `@Version` field, but the sample
+doesn't test two concurrent rentals. A concurrency test is needed to verify that
+the implementation allows only one loan to commit.
 
 **Scenario 3.2's assertion is too loose:**
 
@@ -1367,12 +1290,12 @@ tends to be discovered in production.
 assertThrows(Exception.class, () -> rentBookUseCase.execute(…));
 ```
 
-`Exception.class` is far too loose. The test would still pass if renting failed
+`Exception.class` is too broad. The test would still pass if renting failed
 with a `NullPointerException`, a persistence error, or a validation failure —
 none of which prove the copy was rejected *for being unavailable*. It should be
 `assertThrows(CopyNotAvailableException.class, …)`.
 
-## How the scenario test is built
+### How the scenario test is built
 
 **Deployment.** ShrinkWrap assembles a WAR, resolving test libraries straight off
 the Maven classpath:
@@ -1423,14 +1346,12 @@ private void withTx(Runnable action) throws Exception {
 }
 ```
 
-Each `withTx` block is one unit of work, mirroring how a real request would be
-scoped. One subtlety: `catch (Exception e)` does **not** catch `AssertionError`
-(an `Error`), so AssertJ failures still fail the test — but a genuinely
-unexpected runtime exception inside a block would be silently rolled back and the
-test would pass. Worth tightening if you build on this.
+Each `withTx` block runs inside a user-managed transaction. The helper catches
+and logs `Exception` but doesn't rethrow it, so an unexpected exception can be
+hidden if no later assertion detects the failed operation. `AssertionError`
+isn't caught, so assertion failures still fail the test.
 
-**Eventual consistency.** Because the availability flag is updated by an event
-observer across transaction boundaries, assertions poll rather than assume:
+**Availability assertions.** The test polls for the copy's updated state:
 
 ```java
 await().atMost(5000, TimeUnit.MILLISECONDS).untilAsserted(() -> {
@@ -1440,16 +1361,18 @@ await().atMost(5000, TimeUnit.MILLISECONDS).untilAsserted(() -> {
 });
 ```
 
-**The context boundary is visible.** Renting requires converting between the two
-`CopyId` types, and the fully-qualified name in the test is the seam showing
-through:
+The event observer is synchronous and runs as part of the use-case transaction,
+so polling doesn't demonstrate eventual consistency. A direct assertion after
+the operation would better describe this implementation.
+
+**The context boundary is visible.** Renting converts between the two `CopyId`
+types:
 
 ```java
 rentBookUseCase.execute(library.lending.domain.CopyId.of(copyId.id()), userId);
 ```
 
-That awkwardness is a feature. If it were invisible, the contexts would already
-be merged.
+The conversion makes the context-specific identifiers explicit.
 
 **The overdue scenario** constructs a loan whose due date is 35 days in the past
 via `Loan`'s public four-argument constructor, then returns it:
@@ -1471,16 +1394,17 @@ assertThat(loan.overdueFee()).isEqualTo(OverdueFee.BEYOND_A_MONTH.amount());
 This is the value of injecting a `Clock` and exposing a timestamp-taking
 constructor: the test controls time instead of sleeping for a month.
 
-**Adapter tests** run at unit level with WireMock, exercising the real JAX-RS
-stack against a stubbed Open Library on `localhost:8080` — four cases covering
-the 302→200 happy path, 404, 500, and `Fault.CONNECTION_RESET_BY_PEER`. No
-network, no container, fast.
+**Adapter tests** use WireMock to exercise the JAX-RS client against a stubbed
+Open Library service on `localhost:8080`. They cover the 302-to-200 redirect,
+404, 500, and `Fault.CONNECTION_RESET_BY_PEER` without calling the real service.
 
 ---
 
-# Part IV — Running the code
+## Part IV — Run the code
 
-## Prerequisites
+### Prerequisites
+
+Install the following tools before you build:
 
 - **Java 21** (the POM sets `maven.compiler.release=21`)
 - **Maven 3.9.x**
@@ -1490,7 +1414,9 @@ network, no container, fast.
 Docker is not required. The container profiles download and unpack an app server
 into `target/` for you.
 
-## Clone and build
+### Clone and build
+
+Run these commands from a terminal:
 
 ```bash
 git clone https://github.com/hantsy/jakartaee-ddd-example
@@ -1507,7 +1433,7 @@ started. This is the fast feedback loop and it includes all eight ArchUnit rules
 The default build runs the EclipseLink JPA metamodel processor, so static
 metamodel classes (`Book_`, `Copy_`, `Loan_`, …) are generated alongside your
 entities — but **no repository implementations**. On GlassFish/EclipseLink the
-repository is realised reflectively by the runtime at deployment. Building with
+repository is realized reflectively by the runtime at deployment. Building with
 the WildFly profile swaps in `org.hibernate.orm:hibernate-processor`, which
 instead emits a compiled `BookRepository_` / `CopyRepository_` / `LoanRepository_`
 implementation at compile time:
@@ -1517,9 +1443,11 @@ mvn -B -P wildfly compiler:compile
 # then inspect target/generated-sources/annotations/library/catalog/domain/
 ```
 
-Part II §2 has the full runtime-vs-compile-time comparison.
+See Part II §2 for the runtime-versus-compile-time comparison.
 
-## Run the scenario tests on GlassFish 8
+### Run the scenario tests on GlassFish 8
+
+Use this command to run the scenarios in a managed GlassFish server:
 
 ```bash
 mvn clean verify -Parq-glassfish-managed
@@ -1536,7 +1464,9 @@ The default `glassfish` profile is also active and carries a Cargo configuration
 with downloads cached in `../installs`. That is for Cargo-driven local
 deployment; the Arquillian profile manages its own container.
 
-## Run the scenario tests on WildFly Preview
+### Run the scenario tests on WildFly Preview
+
+Use this command to run the scenarios in a managed WildFly server:
 
 ```bash
 mvn clean verify -Parq-wildfly-managed
@@ -1553,12 +1483,12 @@ Running the identical WAR against two providers is the real proof that the domai
 model is not coupled to either. It is also how you find provider-specific rough
 edges early.
 
-## Continuous integration
+### Continuous integration
 
 Three GitHub Actions workflows, all on Java 21 / Temurin with a Maven cache:
 
 | Workflow | Command |
-|---|---|
+| --- | --- |
 | `build.yml` | `mvn -B package` |
 | `arq-glassfish-managed.yml` | `mvn -B -q clean verify -Parq-glassfish-managed` |
 | `arq-wildfly-managed.yml` | `mvn -B -q clean verify -Parq-wildfly-managed` |
@@ -1567,14 +1497,14 @@ The GlassFish job uploads `target/glassfish*/glassfish/domains/domain1/logs/serv
 as an artifact on failure, which is usually the only way to see what the container
 actually complained about.
 
-## Known issues
+### Known issues
 
 The README carries both of these; neither is a design problem.
 
 1. **EclipseLink on GlassFish.** An EclipseLink defect broke tests on GlassFish
    8.0.0 — tracked as
    [eclipselink#2656](https://github.com/eclipse-ee4j/eclipselink/issues/2656).
-   The project now pins GlassFish 8.0.5 / EclipseLink 5.0.2.
+   The project pins GlassFish 8.0.5 and EclipseLink 5.0.2.
 2. **`BookSearchServiceIT` is `@Disabled`.** The in-container version of the
    search test hits the real `openlibrary.org`, and a default GlassFish domain
    sets `javax.net.ssl.trustStore` JVM-wide to its own two-entry
@@ -1590,67 +1520,59 @@ The README carries both of these; neither is a design problem.
    The equivalent WireMock unit tests cover the same adapter logic without the
    network, so coverage is not lost — only the true end-to-end path is.
 
-## There is no HTTP API (yet)
+### No HTTP API is included
 
-Worth saying before you deploy and wonder: `src/main` contains **no `@Path` or
-`@ApplicationPath` class**. The WAR packages and deploys cleanly, but nothing is
-exposed over HTTP. To exercise the system today you run the integration tests, or
-inject the use cases into your own component.
+`src/main` contains no `@Path` or `@ApplicationPath` class, so the WAR doesn't
+expose an HTTP endpoint. Run the integration tests or inject the use cases into
+another component to exercise the application.
 
-Adding a REST layer is a small, well-defined next step, and the ArchUnit rules
-already tell you where it goes: a new `library.catalog.interfaces` (or
-`..adapter.in.web`) package that injects `AddBookToCatalogUseCase` and friends,
-maps `DomainException` subtypes to HTTP statuses via an `ExceptionMapper`, and
-never touches `..domain..` types directly in its signatures. Rule 2 will fail the
-build the moment a `jakarta.ws.rs` import leaks inward — which is exactly what it
-is there for.
+To add a REST layer, put the resource in an outer adapter package, inject the
+relevant use case, and map `DomainException` subtypes to HTTP statuses with an
+`ExceptionMapper`. Keep Jakarta REST dependencies out of the domain package;
+ArchUnit rule 2 checks that boundary.
 
 ---
 
-# Takeaways
+## Takeaways
 
-**Strategic — before any code**
+### Strategic design
 
-- **Classify subdomains first.** Core gets your best modelling effort, supporting
-  gets the simplest correct thing, generic gets bought or integrated behind a
-  boundary. Lending is core here; cataloguing is supporting; bibliographic lookup
-  is generic and sits behind an adapter precisely so it can be swapped.
+- **Classify subdomains for your organization.** In this example, lending is
+  core, cataloging is supporting, and bibliographic lookup is generic.
 - **A subdomain is not a bounded context.** One partitions the business, the other
   partitions the model. They often coincide — and here the generic subdomain
   deliberately does *not* get a context of its own.
-- **Split contexts by rate and reason for change**, not by noun. A fee-tier change
-  must never risk catalogue metadata.
+- **Use model boundaries that reflect differences in language and change.** A
+  fee-tier change affects lending; a title change affects cataloging.
 - **The same word meaning two different things is the boundary signal.** "Copy" is
-  a physical asset in cataloguing and a borrowed identifier in lending. Do not
+  a physical asset in cataloging and a borrowed identifier in lending. Do not
   glossary that away; build the boundary there.
-- **Healthy context maps have one-way flows.** Two crossed one-way flows —
-  identity downstream, facts upstream — can each be replaced independently. A
-  bidirectional *data* dependency never can.
+- **Make context relationships explicit.** This sample shares identifiers and
+  events in one application; separate deployments need additional integration
+  design.
 - **Pin the ubiquitous language down and hunt its traps.** "Available" needed an
   exact definition; "return" turned out to be both an act and a date, and only the
   date determines the fee.
-- **Name the single place two contexts meet** instead of pretending they don't.
+- **Keep cross-context dependencies visible.** `DomainEventListener` is the
+  cataloging class that observes lending events.
 
-**Tactical — in code**
+### Tactical design
 
-- **Entity vs. value object, one question:** would two instances with the same
-  attributes be the same thing? Three entities here; everything else a record.
+- **Distinguish entities from values.** This sample has three entity types;
+  identifiers and event payloads are represented as value objects.
 - **Identifiers are value objects.** Wrapping them — and giving lending a `CopyId`
   that cannot mint its own UUID — puts ownership in the type system.
-- **Aggregates reference each other by identity, never by containment.** Zero JPA
-  associations buys small transactions, no lazy-loading traps, and
-  compiler-enforced context isolation.
+- **Use identifiers across aggregate boundaries.** The sample avoids JPA
+  associations between its aggregates.
 - **A rule that must consult more than one instance is a domain service**, not an
   entity method. One loan cannot see the other loans against the same copy, so
   "at most one open loan" lives in `CopyAvailabilityValidator`.
-- **Keep application services empty of rules.** One per journey: validate,
-  construct, persist, announce.
+- **Keep application services focused on orchestration.** The use cases validate,
+  construct, persist, and publish events.
 - **Domain events carry the minimum a subscriber needs.** One `CopyId`, not a
   whole `Loan`.
-- **Jakarta Data turns the repository from infrastructure you own into a domain
-  contract you declare:** four lines, in `..domain..`, with no implementation
-  class in your source tree. The biggest quality-of-life change Jakarta EE 11
-  brings to DDD.
+- **Declare repository contracts with Jakarta Data.** The sample keeps the
+  interfaces in the domain package and uses runtime-provided implementations.
 - **Jakarta Data is a spec, not a library.** The interface is yours; the
   implementation is your runtime's. EclipseLink proxies it reflectively at
   deployment; Hibernate compiles a `BookRepository_` via its annotation
@@ -1660,11 +1582,11 @@ is there for.
   code rather than a DAO.
 - **CDI stereotypes** (`@UseCase`) collapse scope + transaction + logging into one
   greppable, enforceable concept.
-- **CDI events are a complete domain event mechanism:** synchronous, type-safe,
-  transaction-sharing, and swappable for async or a broker without touching
-  publishers.
-- **Constructor injection plus package-private constructors** is most of your
-  encapsulation budget, spent well.
+- **Use CDI events for in-process communication.** A broker or separate service
+  requires additional delivery and transaction design.
+- **Use constructor injection** to make dependencies visible. Use public or
+  protected no-arg constructors for JPA entities, as required by the
+  specification.
 - **ArchUnit** turns "we agreed on this architecture" into "the build fails if you
   break it" — eight rules, including one that whitelists a single class so the
   exception stays visible.
@@ -1672,16 +1594,16 @@ is there for.
   one you are making, write it down, and ban the annotations that would make it
   worse.
 
-**Verification**
+### Verification
 
 - **Write the requirements down before reading the code.** Doing so surfaced a
-  stated rule nobody had implemented (a copy must belong to a catalogued book)
+  stated rule nobody had implemented (a copy must belong to a cataloged book)
   and an untested one (two borrowers racing for one copy) — neither visible from
   the code alone.
 - **Map every scenario ID to a test.** The coverage matrix is the deliverable; the
   ❌ rows are the backlog.
-- **Run the same WAR against two providers in CI.** The only honest proof that the
-  domain is provider-agnostic.
+- **Run the application against each supported provider in CI.** This checks
+  compatibility with those providers, but doesn't prove portability in general.
 - **Inject the real Jakarta Data repositories** into scenario tests rather than
   faking them — the point is that the generated implementation works.
 - **Assert the specific domain exception.** `assertThrows(Exception.class, …)`
@@ -1689,4 +1611,13 @@ is there for.
 - **Record a disabled test's reason on the annotation**, with the upstream issue
   link.
 
-Full source: [github.com/hantsy/jakartaee-ddd-example](https://github.com/hantsy/jakartaee-ddd-example).
+Source code: [hantsy/jakartaee-ddd-example](https://github.com/hantsy/jakartaee-ddd-example).
+
+### Further reading
+
+- [Domain-Driven Design](https://martinfowler.com/bliki/DomainDrivenDesign.html)
+  by Martin Fowler provides an overview of DDD concepts.
+- [An Introduction to Domain-Driven Design](https://www.dddcommunity.org/learning-ddd/haywood_2010/)
+  by Dan Haywood is an introductory article listed by the DDD Community.
+- [DDD Reference](https://www.domainlanguage.com/ddd/reference/) by Eric Evans
+  is a concise pattern reference for readers who already know the basics.
