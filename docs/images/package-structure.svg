@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790" role="img" aria-labelledby="title description">
+  <title id="title">Library package structure</title>
+  <desc id="description">Package tree for the library application. The shared package contains cross-cutting technical types and depends on neither bounded context. The catalog context contains application, domain, and infrastructure packages, including the Open Library adapter. The lending context contains application and domain packages; its Jakarta Data repository is supplied by the runtime, so there is no infrastructure package.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+      .title { font-size: 28px; font-weight: 700; }
+      .root { font: 700 22px Consolas, "Courier New", monospace; }
+      .context { font-size: 14px; font-weight: 700; letter-spacing: 1px; fill: #475569; }
+      .pkg { font: 700 17px Consolas, "Courier New", monospace; }
+      .details { font-size: 16px; }
+      .note { font-size: 14px; fill: #475569; }
+      .branch { fill: none; stroke: #64748b; stroke-width: 2; }
+    </style>
+  </defs>
+  <rect width="1240" height="790" fill="#ffffff"/>
+  <text x="40" y="46" class="title">Library package structure</text>
+  <text x="64" y="100" class="root">library</text>
+  <path d="M75 112 V690 M75 156 H112 M75 294 H112 M75 478 H112" class="branch"/>
+
+  <rect x="112" y="126" width="1080" height="114" rx="12" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+  <text x="140" y="159" class="pkg">shared</text>
+  <text x="290" y="159" class="note">Technical types; depends on neither bounded context</text>
+  <text x="140" y="190" class="details">UseCase · Logged · LoggedInterceptor · DomainException · ClockProducer</text>
+
+  <rect x="112" y="260" width="1080" height="194" rx="12" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="140" y="292" class="context">CATALOG CONTEXT</text>
+  <path d="M128 308 V433 M128 326 H148 M128 366 H148 M128 406 H148" class="branch"/>
+  <text x="148" y="332" class="pkg">application</text>
+  <text x="355" y="332" class="details">AddBookToCatalogUseCase · RegisterBookCopyUseCase · DomainEventListener</text>
+  <text x="148" y="372" class="pkg">domain</text>
+  <text x="355" y="372" class="details">Book · Copy · BookRepository · CopyRepository · BookSearchService (port)</text>
+  <text x="148" y="412" class="pkg">infrastructure</text>
+  <text x="355" y="412" class="details">OpenLibraryBookSearchService (adapter)</text>
+
+  <rect x="112" y="474" width="1080" height="202" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="140" y="506" class="context">LENDING CONTEXT</text>
+  <path d="M128 522 V654 M128 540 H148 M128 594 H148" class="branch"/>
+  <text x="148" y="546" class="pkg">application</text>
+  <text x="355" y="546" class="details">RentBookUseCase · ReturnBookUseCase</text>
+  <text x="148" y="600" class="pkg">domain</text>
+  <text x="355" y="600" class="details">Loan · LoanRepository · CopyAvailabilityValidator</text>
+  <text x="355" y="626" class="details">OverdueFee · LoanCreated · LoanClosed</text>
+  <text x="148" y="654" class="note">No infrastructure package; the Jakarta Data runtime supplies the repository implementation.</text>
+
+  <text x="40" y="728" class="note">Package layout shows code organization; ArchUnit rules enforce the intended dependency boundaries.</text>
+</svg>

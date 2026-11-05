@@ -915,24 +915,9 @@ network — which is what the WireMock tests exploit in Part III.
 
 ### 5. Packages and ArchUnit rules
 
-The two bounded contexts and the shared technical package from Part I map to
-three top-level packages:
+The two bounded contexts and shared technical package map to this package tree:
 
-```
-library
-├── shared                    shared technical types — depends on neither context
-│   ├── UseCase               stereotype: @ApplicationScoped + @Transactional + @Logged
-│   ├── Logged / LoggedInterceptor
-│   ├── DomainException       base type for every domain failure
-│   └── ClockProducer
-├── catalog
-│   ├── application           AddBookToCatalogUseCase, RegisterBookCopyUseCase, DomainEventListener
-│   ├── domain                Book, Copy, BookRepository, CopyRepository, BookSearchService (port)
-│   └── infrastructure        OpenLibraryBookSearchService (adapter)
-└── lending
-    ├── application           RentBookUseCase, ReturnBookUseCase
-    └── domain                Loan, LoanRepository, CopyAvailabilityValidator, OverdueFee, LoanCreated, LoanClosed
-```
+![Library package tree showing shared technical types, catalog application/domain/infrastructure packages, and lending application/domain packages, including representative classes.](images/package-structure.svg)
 
 The lending context has no infrastructure package in this sample. Its repository
 interface is implemented by the Jakarta Data runtime; the application still
