@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" role="img" aria-labelledby="title description">
+  <title id="title">Library subdomains and bounded contexts</title>
+  <desc id="description">Lending is the core subdomain, cataloging is supporting, and bibliographic lookup is generic. The library application has separate lending and cataloging bounded contexts. Cataloging owns a BookSearchService port to an external bibliographic service; lookup has no separate bounded context.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#334155"/>
+    </marker>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+      .eyebrow { font-size: 15px; font-weight: 700; letter-spacing: 1px; fill: #475569; }
+      .heading { font-size: 20px; font-weight: 700; }
+      .body { font-size: 16px; }
+      .small { font-size: 14px; fill: #475569; }
+      .card { stroke-width: 2; rx: 12; }
+    </style>
+  </defs>
+  <rect width="1000" height="640" fill="#ffffff"/>
+  <text x="32" y="38" class="eyebrow">BUSINESS DOMAIN · SUBDOMAINS</text>
+
+  <rect x="30" y="58" width="300" height="132" class="card" fill="#eff6ff" stroke="#2563eb"/>
+  <text x="52" y="91" class="heading">Lending</text>
+  <text x="52" y="119" class="body">Core subdomain</text>
+  <text x="52" y="153" class="small">Loans, availability, overdue fees</text>
+
+  <rect x="350" y="58" width="300" height="132" class="card" fill="#f0fdf4" stroke="#16a34a"/>
+  <text x="372" y="91" class="heading">Cataloging</text>
+  <text x="372" y="119" class="body">Supporting subdomain</text>
+  <text x="372" y="153" class="small">Books, physical copies, shelf status</text>
+
+  <rect x="670" y="58" width="300" height="132" class="card" fill="#f8fafc" stroke="#64748b"/>
+  <text x="692" y="91" class="heading">Bibliographic lookup</text>
+  <text x="692" y="119" class="body">Generic subdomain</text>
+  <text x="692" y="153" class="small">Resolve ISBNs to book information</text>
+
+  <text x="32" y="244" class="eyebrow">SOFTWARE MODEL · BOUNDED CONTEXTS</text>
+  <rect x="20" y="262" width="720" height="296" rx="18" fill="#fbfdff" stroke="#64748b" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="42" y="291" class="small">Library application boundary</text>
+
+  <rect x="35" y="315" width="300" height="205" class="card" fill="#eff6ff" stroke="#2563eb"/>
+  <text x="57" y="350" class="heading">Lending context</text>
+  <text x="57" y="382" class="body">Loan</text>
+  <text x="57" y="408" class="body">Due date and overdue fee</text>
+  <text x="57" y="471" class="small">Owns loan rules and language</text>
+
+  <rect x="425" y="315" width="300" height="205" class="card" fill="#f0fdf4" stroke="#16a34a"/>
+  <text x="447" y="350" class="heading">Cataloging context</text>
+  <text x="447" y="382" class="body">Book · Copy · shelf status</text>
+  <rect x="447" y="430" width="250" height="52" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="462" y="462" class="body">BookSearchService port</text>
+
+  <path d="M420 385 H343" fill="none" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="349" y="375" class="small">Copy ID</text>
+  <path d="M343 425 H420" fill="none" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="344" y="447" class="small">Loan events</text>
+
+  <rect x="780" y="360" width="190" height="130" class="card" fill="#fff7ed" stroke="#ea580c"/>
+  <text x="797" y="394" class="heading">External</text>
+  <text x="797" y="420" class="heading">bibliographic</text>
+  <text x="797" y="446" class="heading">service</text>
+  <text x="797" y="472" class="small">Outside the contexts</text>
+  <path d="M697 456 H773" fill="none" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="708" y="444" class="small">adapter</text>
+
+  <text x="32" y="598" class="body">Lookup is a generic subdomain, not a separate bounded context; cataloging accesses it through its port and adapter.</text>
+</svg>

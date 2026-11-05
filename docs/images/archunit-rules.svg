@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1450 460" role="img" aria-labelledby="title description">
+<title id="title">Architecture rules enforced by ArchUnit</title>
+<desc id="description">Eight ArchUnit dependency rules and the architecture property each enforces.</desc>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#172033}.title{font-size:22px;font-weight:700;fill:#fff}.head{font-size:14px;font-weight:700;fill:#334155}.cell{font-size:14px}.grid{stroke:#cbd5e1;stroke-width:1}</style>
+<rect width="1450" height="460" fill="#fff"/>
+<rect x="0" y="0" width="1450" height="52" rx="9" fill="#6d28d9"/>
+<text x="22" y="34" class="title">Architecture rules enforced by ArchUnit</text>
+<rect x="0" y="52" width="1450" height="42" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="16" y="79" class="head">#</text>
+<text x="96" y="79" class="head">Rule</text>
+<text x="1086" y="79" class="head">Enforces</text>
+<rect x="0" y="94" width="1450" height="43" fill="#f5f3ff"/>
+<text x="16" y="119" class="cell">1</text>
+<path d="M0 94 V137" class="grid"/>
+<text x="96" y="119" class="cell">..domain.. must not depend on ..application.. or ..infrastructure..</text>
+<path d="M80 94 V137" class="grid"/>
+<text x="1086" y="119" class="cell">Layer direction</text>
+<path d="M1070 94 V137" class="grid"/>
+<path d="M0 137 H1450" class="grid"/>
+<rect x="0" y="137" width="1450" height="43" fill="#fff"/>
+<text x="16" y="162" class="cell">2</text>
+<path d="M0 137 V180" class="grid"/>
+<text x="96" y="162" class="cell">..domain.. must not depend on jakarta.ws.rs.., jakarta.enterprise.., or jakarta.inject.., except CopyAvailabilityValidator</text>
+<path d="M80 137 V180" class="grid"/>
+<text x="1086" y="162" class="cell">Domain framework-independence</text>
+<path d="M1070 137 V180" class="grid"/>
+<path d="M0 180 H1450" class="grid"/>
+<rect x="0" y="180" width="1450" height="43" fill="#f5f3ff"/>
+<text x="16" y="205" class="cell">3</text>
+<path d="M0 180 V223" class="grid"/>
+<text x="96" y="205" class="cell">..application.. must not depend on ..infrastructure..</text>
+<path d="M80 180 V223" class="grid"/>
+<text x="1086" y="205" class="cell">Dependency inversion</text>
+<path d="M1070 180 V223" class="grid"/>
+<path d="M0 223 H1450" class="grid"/>
+<rect x="0" y="223" width="1450" height="43" fill="#fff"/>
+<text x="16" y="248" class="cell">4</text>
+<path d="M0 223 V266" class="grid"/>
+<text x="96" y="248" class="cell">..application.. must depend on ..domain..</text>
+<path d="M80 223 V266" class="grid"/>
+<text x="1086" y="248" class="cell">Application services orchestrate the model</text>
+<path d="M1070 223 V266" class="grid"/>
+<path d="M0 266 H1450" class="grid"/>
+<rect x="0" y="266" width="1450" height="43" fill="#f5f3ff"/>
+<text x="16" y="291" class="cell">5</text>
+<path d="M0 266 V309" class="grid"/>
+<text x="96" y="291" class="cell">library.shared.. must not depend on catalog.. or lending..</text>
+<path d="M80 266 V309" class="grid"/>
+<text x="1086" y="291" class="cell">Shared package neutrality</text>
+<path d="M1070 266 V309" class="grid"/>
+<path d="M0 309 H1450" class="grid"/>
+<rect x="0" y="309" width="1450" height="43" fill="#fff"/>
+<text x="16" y="334" class="cell">6</text>
+<path d="M0 309 V352" class="grid"/>
+<text x="96" y="334" class="cell">library.lending.. must not depend on library.catalog..</text>
+<path d="M80 309 V352" class="grid"/>
+<text x="1086" y="334" class="cell">Context isolation</text>
+<path d="M1070 309 V352" class="grid"/>
+<path d="M0 352 H1450" class="grid"/>
+<rect x="0" y="352" width="1450" height="43" fill="#f5f3ff"/>
+<text x="16" y="377" class="cell">7</text>
+<path d="M0 352 V395" class="grid"/>
+<text x="96" y="377" class="cell">library.catalog.. must not depend on library.lending.., except DomainEventListener</text>
+<path d="M80 352 V395" class="grid"/>
+<text x="1086" y="377" class="cell">The one named coupling</text>
+<path d="M1070 352 V395" class="grid"/>
+<path d="M0 395 H1450" class="grid"/>
+<rect x="0" y="395" width="1450" height="43" fill="#fff"/>
+<text x="16" y="420" class="cell">8</text>
+<path d="M0 395 V438" class="grid"/>
+<text x="96" y="420" class="cell">Any Repository must reside in ..domain..</text>
+<path d="M80 395 V438" class="grid"/>
+<text x="1086" y="420" class="cell">Repository is a port</text>
+<path d="M1070 395 V438" class="grid"/>
+<path d="M0 438 H1450" class="grid"/>
+<rect x="0.75" y="52" width="1448.5" height="397" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+</svg>

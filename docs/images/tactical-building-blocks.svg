@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1450 644" role="img" aria-labelledby="title description">
+<title id="title">Tactical building blocks</title>
+<desc id="description">Domain and technical building blocks used in the sample and their Jakarta EE mechanisms.</desc>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#172033}.title{font-size:22px;font-weight:700;fill:#fff}.head{font-size:14px;font-weight:700;fill:#334155}.cell{font-size:15px}.grid{stroke:#cbd5e1;stroke-width:1}</style>
+<rect width="1450" height="644" fill="#fff"/>
+<rect x="0" y="0" width="1450" height="52" rx="9" fill="#15803d"/>
+<text x="22" y="34" class="title">Tactical building blocks</text>
+<rect x="0" y="52" width="1450" height="42" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="16" y="79" class="head">Building block</text>
+<text x="346" y="79" class="head">In this sample</text>
+<text x="846" y="79" class="head">Jakarta EE mechanism</text>
+<rect x="0" y="94" width="1450" height="44" fill="#f0fdf4"/>
+<text x="16" y="120" class="cell">Entity / aggregate root</text>
+<path d="M0 94 V138" class="grid"/>
+<text x="346" y="120" class="cell">Book, Copy, Loan</text>
+<path d="M330 94 V138" class="grid"/>
+<text x="846" y="120" class="cell">JPA @Entity, @EmbeddedId, @Version</text>
+<path d="M830 94 V138" class="grid"/>
+<path d="M0 138 H1450" class="grid"/>
+<rect x="0" y="138" width="1450" height="44" fill="#fff"/>
+<text x="16" y="164" class="cell">Value object</text>
+<path d="M0 138 V182" class="grid"/>
+<text x="346" y="164" class="cell">Isbn, BarCode, every Id</text>
+<path d="M330 138 V182" class="grid"/>
+<text x="846" y="164" class="cell">Java record + @Embeddable</text>
+<path d="M830 138 V182" class="grid"/>
+<path d="M0 182 H1450" class="grid"/>
+<rect x="0" y="182" width="1450" height="44" fill="#f0fdf4"/>
+<text x="16" y="208" class="cell">Repository</text>
+<path d="M0 182 V226" class="grid"/>
+<text x="346" y="208" class="cell">BookRepository, CopyRepository, LoanRepository</text>
+<path d="M330 182 V226" class="grid"/>
+<text x="846" y="208" class="cell">Jakarta Data @Repository + CrudRepository</text>
+<path d="M830 182 V226" class="grid"/>
+<path d="M0 226 H1450" class="grid"/>
+<rect x="0" y="226" width="1450" height="44" fill="#fff"/>
+<text x="16" y="252" class="cell">Domain event</text>
+<path d="M0 226 V270" class="grid"/>
+<text x="346" y="252" class="cell">LoanCreated, LoanClosed</text>
+<path d="M330 226 V270" class="grid"/>
+<text x="846" y="252" class="cell">CDI Event&lt;T&gt; / @Observes</text>
+<path d="M830 226 V270" class="grid"/>
+<path d="M0 270 H1450" class="grid"/>
+<rect x="0" y="270" width="1450" height="44" fill="#f0fdf4"/>
+<text x="16" y="296" class="cell">Domain service / port</text>
+<path d="M0 270 V314" class="grid"/>
+<text x="346" y="296" class="cell">CopyAvailabilityValidator, BookSearchService</text>
+<path d="M330 270 V314" class="grid"/>
+<text x="846" y="296" class="cell">CDI bean / domain-facing interface</text>
+<path d="M830 270 V314" class="grid"/>
+<path d="M0 314 H1450" class="grid"/>
+<rect x="0" y="314" width="1450" height="44" fill="#fff"/>
+<text x="16" y="340" class="cell">Application service</text>
+<path d="M0 314 V358" class="grid"/>
+<text x="346" y="340" class="cell">the four UseCase classes</text>
+<path d="M330 314 V358" class="grid"/>
+<text x="846" y="340" class="cell">@UseCase stereotype</text>
+<path d="M830 314 V358" class="grid"/>
+<path d="M0 358 H1450" class="grid"/>
+<rect x="0" y="358" width="1450" height="44" fill="#f0fdf4"/>
+<text x="16" y="384" class="cell">Transaction &amp; rollback</text>
+<path d="M0 358 V402" class="grid"/>
+<text x="346" y="384" class="cell">every use case</text>
+<path d="M330 358 V402" class="grid"/>
+<text x="846" y="384" class="cell">JTA @Transactional + unchecked DomainException</text>
+<path d="M830 358 V402" class="grid"/>
+<path d="M0 402 H1450" class="grid"/>
+<rect x="0" y="402" width="1450" height="44" fill="#fff"/>
+<text x="16" y="428" class="cell">Adapter</text>
+<path d="M0 402 V446" class="grid"/>
+<text x="346" y="428" class="cell">OpenLibraryBookSearchService</text>
+<path d="M330 402 V446" class="grid"/>
+<text x="846" y="428" class="cell">CDI @ApplicationScoped + JAX-RS Client</text>
+<path d="M830 402 V446" class="grid"/>
+<path d="M0 446 H1450" class="grid"/>
+<rect x="0" y="446" width="1450" height="44" fill="#f0fdf4"/>
+<text x="16" y="472" class="cell">Cross-cutting policy</text>
+<path d="M0 446 V490" class="grid"/>
+<text x="346" y="472" class="cell">logging</text>
+<path d="M330 446 V490" class="grid"/>
+<text x="846" y="472" class="cell">CDI @Interceptor + @InterceptorBinding</text>
+<path d="M830 446 V490" class="grid"/>
+<path d="M0 490 H1450" class="grid"/>
+<rect x="0" y="490" width="1450" height="44" fill="#fff"/>
+<text x="16" y="516" class="cell">Time as a dependency</text>
+<path d="M0 490 V534" class="grid"/>
+<text x="346" y="516" class="cell">loan dates</text>
+<path d="M330 490 V534" class="grid"/>
+<text x="846" y="516" class="cell">CDI @Produces Clock</text>
+<path d="M830 490 V534" class="grid"/>
+<path d="M0 534 H1450" class="grid"/>
+<rect x="0" y="534" width="1450" height="44" fill="#f0fdf4"/>
+<text x="16" y="560" class="cell">Persistence config</text>
+<path d="M0 534 V578" class="grid"/>
+<text x="346" y="560" class="cell">defaultPU → java:comp/DefaultDataSource</text>
+<path d="M330 534 V578" class="grid"/>
+<text x="846" y="560" class="cell">persistence.xml, JTA datasource</text>
+<path d="M830 534 V578" class="grid"/>
+<path d="M0 578 H1450" class="grid"/>
+<rect x="0" y="578" width="1450" height="44" fill="#fff"/>
+<text x="16" y="604" class="cell">Bean discovery</text>
+<path d="M0 578 V622" class="grid"/>
+<text x="346" y="604" class="cell">interceptor registration</text>
+<path d="M330 578 V622" class="grid"/>
+<text x="846" y="604" class="cell">beans.xml 4.0</text>
+<path d="M830 578 V622" class="grid"/>
+<path d="M0 622 H1450" class="grid"/>
+<rect x="0.75" y="52" width="1448.5" height="581" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+</svg>

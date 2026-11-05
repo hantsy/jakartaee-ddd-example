@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 688" role="img" aria-labelledby="title description">
+<title id="title">Ubiquitous language</title>
+<desc id="description">Terms used in the library example and their meanings.</desc>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#172033}.title{font-size:22px;font-weight:700;fill:#fff}.head{font-size:14px;font-weight:700;fill:#334155}.cell{font-size:15px}.grid{stroke:#cbd5e1;stroke-width:1}</style>
+<rect width="1480" height="688" fill="#fff"/>
+<rect x="0" y="0" width="1480" height="52" rx="9" fill="#4f46e5"/>
+<text x="22" y="34" class="title">Ubiquitous language</text>
+<rect x="0" y="52" width="1480" height="42" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="16" y="79" class="head">Term</text>
+<text x="286" y="79" class="head">What it means here</text>
+<rect x="0" y="94" width="1480" height="44" fill="#eef2ff"/>
+<text x="16" y="120" class="cell">Book</text>
+<path d="M0 94 V138" class="grid"/>
+<text x="286" y="120" class="cell">A catalog record identified by an ISBN. It isn&#x27;t a physical item.</text>
+<path d="M270 94 V138" class="grid"/>
+<path d="M0 138 H1480" class="grid"/>
+<rect x="0" y="138" width="1480" height="44" fill="#fff"/>
+<text x="16" y="164" class="cell">Title</text>
+<path d="M0 138 V182" class="grid"/>
+<text x="286" y="164" class="cell">The published name of a book.</text>
+<path d="M270 138 V182" class="grid"/>
+<path d="M0 182 H1480" class="grid"/>
+<rect x="0" y="182" width="1480" height="44" fill="#eef2ff"/>
+<text x="16" y="208" class="cell">ISBN</text>
+<path d="M0 182 V226" class="grid"/>
+<text x="286" y="208" class="cell">A number that identifies a particular book edition and format; this sample uses it to find a catalog record.</text>
+<path d="M270 182 V226" class="grid"/>
+<path d="M0 226 H1480" class="grid"/>
+<rect x="0" y="226" width="1480" height="44" fill="#fff"/>
+<text x="16" y="252" class="cell">Copy</text>
+<path d="M0 226 V270" class="grid"/>
+<text x="286" y="252" class="cell">One physical item on the shelf — a specific book, with its own barcode.</text>
+<path d="M270 226 V270" class="grid"/>
+<path d="M0 270 H1480" class="grid"/>
+<rect x="0" y="270" width="1480" height="44" fill="#eef2ff"/>
+<text x="16" y="296" class="cell">Barcode</text>
+<path d="M0 270 V314" class="grid"/>
+<text x="286" y="296" class="cell">The sticker on a copy, scanned at the desk.</text>
+<path d="M270 270 V314" class="grid"/>
+<path d="M0 314 H1480" class="grid"/>
+<rect x="0" y="314" width="1480" height="44" fill="#fff"/>
+<text x="16" y="340" class="cell">Shelf status</text>
+<path d="M0 314 V358" class="grid"/>
+<text x="286" y="340" class="cell">Whether a copy can be borrowed.</text>
+<path d="M270 314 V358" class="grid"/>
+<path d="M0 358 H1480" class="grid"/>
+<rect x="0" y="358" width="1480" height="44" fill="#eef2ff"/>
+<text x="16" y="384" class="cell">Borrower</text>
+<path d="M0 358 V402" class="grid"/>
+<text x="286" y="384" class="cell">A library member identified on a loan.</text>
+<path d="M270 358 V402" class="grid"/>
+<path d="M0 402 H1480" class="grid"/>
+<rect x="0" y="402" width="1480" height="44" fill="#fff"/>
+<text x="16" y="428" class="cell">Loan</text>
+<path d="M0 402 V446" class="grid"/>
+<text x="286" y="428" class="cell">The record that a borrower holds a copy — opened on one date, due on another.</text>
+<path d="M270 402 V446" class="grid"/>
+<path d="M0 446 H1480" class="grid"/>
+<rect x="0" y="446" width="1480" height="44" fill="#eef2ff"/>
+<text x="16" y="472" class="cell">Due date</text>
+<path d="M0 446 V490" class="grid"/>
+<text x="286" y="472" class="cell">Thirty days after a loan opens.</text>
+<path d="M270 446 V490" class="grid"/>
+<path d="M0 490 H1480" class="grid"/>
+<rect x="0" y="490" width="1480" height="44" fill="#fff"/>
+<text x="16" y="516" class="cell">Return</text>
+<path d="M0 490 V534" class="grid"/>
+<text x="286" y="516" class="cell">Closing an open loan.</text>
+<path d="M270 490 V534" class="grid"/>
+<path d="M0 534 H1480" class="grid"/>
+<rect x="0" y="534" width="1480" height="44" fill="#eef2ff"/>
+<text x="16" y="560" class="cell">Overdue</text>
+<path d="M0 534 V578" class="grid"/>
+<text x="286" y="560" class="cell">A loan returned after its due date.</text>
+<path d="M270 534 V578" class="grid"/>
+<path d="M0 578 H1480" class="grid"/>
+<rect x="0" y="578" width="1480" height="44" fill="#fff"/>
+<text x="16" y="604" class="cell">Overdue fee</text>
+<path d="M0 578 V622" class="grid"/>
+<text x="286" y="604" class="cell">A tiered charge for lateness.</text>
+<path d="M270 578 V622" class="grid"/>
+<path d="M0 622 H1480" class="grid"/>
+<rect x="0" y="622" width="1480" height="44" fill="#eef2ff"/>
+<text x="16" y="648" class="cell">Catalog</text>
+<path d="M0 622 V666" class="grid"/>
+<text x="286" y="648" class="cell">The library&#x27;s list of the books it holds.</text>
+<path d="M270 622 V666" class="grid"/>
+<path d="M0 666 H1480" class="grid"/>
+<rect x="0.75" y="52" width="1478.5" height="625" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+</svg>

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1450 468" role="img" aria-labelledby="title description">
+<title id="title">Invariants and their guards</title>
+<desc id="description">The sample invariants, code that guards them, and current enforcement status.</desc>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#172033}.title{font-size:22px;font-weight:700;fill:#fff}.head{font-size:14px;font-weight:700;fill:#334155}.cell{font-size:15px}.grid{stroke:#cbd5e1;stroke-width:1}</style>
+<rect width="1450" height="468" fill="#fff"/>
+<rect x="0" y="0" width="1450" height="52" rx="9" fill="#c2410c"/>
+<text x="22" y="34" class="title">Invariants and their guards</text>
+<rect x="0" y="52" width="1450" height="42" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="16" y="79" class="head">Invariant</text>
+<text x="516" y="79" class="head">Guarded by</text>
+<text x="976" y="79" class="head">Current behavior</text>
+<rect x="0" y="94" width="1450" height="44" fill="#fff7ed"/>
+<text x="16" y="120" class="cell">An ISBN must be structurally valid</text>
+<path d="M0 94 V138" class="grid"/>
+<text x="516" y="120" class="cell">Isbn constructor</text>
+<path d="M500 94 V138" class="grid"/>
+<text x="976" y="120" class="cell">Enforced</text>
+<path d="M960 94 V138" class="grid"/>
+<path d="M0 138 H1450" class="grid"/>
+<rect x="0" y="138" width="1450" height="44" fill="#fff"/>
+<text x="16" y="164" class="cell">No duplicate book in the catalog</text>
+<path d="M0 138 V182" class="grid"/>
+<text x="516" y="164" class="cell">AddBookToCatalogUseCase checks before adding</text>
+<path d="M500 138 V182" class="grid"/>
+<text x="976" y="164" class="cell">Checked before each add</text>
+<path d="M960 138 V182" class="grid"/>
+<path d="M0 182 H1450" class="grid"/>
+<rect x="0" y="182" width="1450" height="44" fill="#fff7ed"/>
+<text x="16" y="208" class="cell">A copy must have a book ID and barcode</text>
+<path d="M0 182 V226" class="grid"/>
+<text x="516" y="208" class="cell">Copy constructor</text>
+<path d="M500 182 V226" class="grid"/>
+<text x="976" y="208" class="cell">Enforced</text>
+<path d="M960 182 V226" class="grid"/>
+<path d="M0 226 H1450" class="grid"/>
+<rect x="0" y="226" width="1450" height="44" fill="#fff"/>
+<text x="16" y="252" class="cell">A copy&#x27;s book ID must identify a cataloged book</text>
+<path d="M0 226 V270" class="grid"/>
+<text x="516" y="252" class="cell">Not enforced in the current code</text>
+<path d="M500 226 V270" class="grid"/>
+<text x="976" y="252" class="cell">Not enforced</text>
+<path d="M960 226 V270" class="grid"/>
+<path d="M0 270 H1450" class="grid"/>
+<rect x="0" y="270" width="1450" height="44" fill="#fff7ed"/>
+<text x="16" y="296" class="cell">At most one open loan per copy</text>
+<path d="M0 270 V314" class="grid"/>
+<text x="516" y="296" class="cell">Availability check before lending</text>
+<path d="M500 270 V314" class="grid"/>
+<text x="976" y="296" class="cell">Checked for sequential requests; concurrency isn&#x27;t tested</text>
+<path d="M960 270 V314" class="grid"/>
+<path d="M0 314 H1450" class="grid"/>
+<rect x="0" y="314" width="1450" height="44" fill="#fff"/>
+<text x="16" y="340" class="cell">The due date is thirty days out</text>
+<path d="M0 314 V358" class="grid"/>
+<text x="516" y="340" class="cell">Loan constructor</text>
+<path d="M500 314 V358" class="grid"/>
+<text x="976" y="340" class="cell">Enforced</text>
+<path d="M960 314 V358" class="grid"/>
+<path d="M0 358 H1450" class="grid"/>
+<rect x="0" y="358" width="1450" height="44" fill="#fff7ed"/>
+<text x="16" y="384" class="cell">The fee tier follows the days late</text>
+<path d="M0 358 V402" class="grid"/>
+<text x="516" y="384" class="cell">Loan.returned</text>
+<path d="M500 358 V402" class="grid"/>
+<text x="976" y="384" class="cell">Enforced</text>
+<path d="M960 358 V402" class="grid"/>
+<path d="M0 402 H1450" class="grid"/>
+<rect x="0" y="402" width="1450" height="44" fill="#fff"/>
+<text x="16" y="428" class="cell">Shelf status matches loan state</text>
+<path d="M0 402 V446" class="grid"/>
+<text x="516" y="428" class="cell">Synchronous CDI observer</text>
+<path d="M500 402 V446" class="grid"/>
+<text x="976" y="428" class="cell">Updated in the application transaction</text>
+<path d="M960 402 V446" class="grid"/>
+<path d="M0 446 H1450" class="grid"/>
+<rect x="0.75" y="52" width="1448.5" height="405" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+</svg>

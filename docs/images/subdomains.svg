@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 314" role="img" aria-labelledby="title description">
+<title id="title">Subdomain classification</title>
+<desc id="description">The example classifies lending as core, cataloging as supporting, and bibliographic lookup as generic.</desc>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#172033}.title{font-size:22px;font-weight:700;fill:#fff}.head{font-size:14px;font-weight:700;fill:#334155}.cell{font-size:15px}.grid{stroke:#cbd5e1;stroke-width:1}</style>
+<rect width="1480" height="314" fill="#fff"/>
+<rect x="0" y="0" width="1480" height="52" rx="9" fill="#0f766e"/>
+<text x="22" y="34" class="title">Subdomain classification</text>
+<rect x="0" y="52" width="1480" height="42" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="16" y="79" class="head">Subdomain</text>
+<text x="246" y="79" class="head">Class</text>
+<text x="436" y="79" class="head">Rationale in this example</text>
+<text x="946" y="79" class="head">Design consequence</text>
+<rect x="0" y="94" width="1480" height="66" fill="#f0fdfa"/>
+<text x="16" y="120" class="cell">Lending</text>
+<path d="M0 94 V160" class="grid"/>
+<text x="246" y="120" class="cell">Core</text>
+<path d="M230 94 V160" class="grid"/>
+<text x="436" y="120" class="cell">Loan duration, availability, and fees are library-specific</text>
+<text x="436" y="142" class="cell">policies.</text>
+<path d="M420 94 V160" class="grid"/>
+<text x="946" y="120" class="cell">Model and test these rules carefully.</text>
+<path d="M930 94 V160" class="grid"/>
+<path d="M0 160 H1480" class="grid"/>
+<rect x="0" y="160" width="1480" height="66" fill="#fff"/>
+<text x="16" y="186" class="cell">Cataloging</text>
+<path d="M0 160 V226" class="grid"/>
+<text x="246" y="186" class="cell">Supporting</text>
+<path d="M230 160 V226" class="grid"/>
+<text x="436" y="186" class="cell">The library needs accurate records of books and physical</text>
+<text x="436" y="208" class="cell">copies.</text>
+<path d="M420 160 V226" class="grid"/>
+<text x="946" y="186" class="cell">Keep cataloging focused on the requirements in this example.</text>
+<path d="M930 160 V226" class="grid"/>
+<path d="M0 226 H1480" class="grid"/>
+<rect x="0" y="226" width="1480" height="66" fill="#f0fdfa"/>
+<text x="16" y="252" class="cell">Bibliographic lookup</text>
+<path d="M0 226 V292" class="grid"/>
+<text x="246" y="252" class="cell">Generic</text>
+<path d="M230 226 V292" class="grid"/>
+<text x="436" y="252" class="cell">External services can resolve ISBNs to bibliographic</text>
+<text x="436" y="274" class="cell">information.</text>
+<path d="M420 226 V292" class="grid"/>
+<text x="946" y="252" class="cell">Integrate through a replaceable interface rather than building a</text>
+<text x="946" y="274" class="cell">lookup service here.</text>
+<path d="M930 226 V292" class="grid"/>
+<path d="M0 292 H1480" class="grid"/>
+<rect x="0.75" y="52" width="1478.5" height="251" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+</svg>

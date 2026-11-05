@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 980" role="img" aria-labelledby="title description">
+  <title id="title">Library event-storming diagram</title>
+  <desc id="description">An original event-storming view of the library workflows. A librarian resolves an ISBN through an external bibliographic service, catalogs the book, and registers copies. A borrower lends a copy, opening a loan and triggering a policy to mark the copy off shelf. Desk staff returns a copy, closing the loan and triggering a policy to make it available; a late return also charges an overdue fee. Aggregates decide commands, and green read models show the catalog, shelf status, and borrower loans.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#475569"/>
+    </marker>
+    <marker id="dotted-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#7c3aed"/>
+    </marker>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+      .title { font-size: 28px; font-weight: 700; }
+      .lane { font-size: 17px; font-weight: 700; letter-spacing: 1px; fill: #475569; }
+      .label { font-size: 16px; font-weight: 700; }
+      .small { font-size: 14px; fill: #475569; }
+      .node { stroke-width: 2; rx: 10; }
+      .command { fill: #dbeafe; stroke: #2563eb; }
+      .event { fill: #ffedd5; stroke: #ea580c; }
+      .policy { fill: #f3e8ff; stroke: #9333ea; }
+      .read { fill: #dcfce7; stroke: #16a34a; }
+      .external { fill: #fce7f3; stroke: #db2777; }
+      .actor { fill: #f1f5f9; stroke: #475569; }
+      .aggregate { fill: #fefce8; stroke: #ca8a04; stroke-dasharray: 7 5; }
+      .flow { fill: none; stroke: #475569; stroke-width: 2.2; marker-end: url(#arrow); }
+      .reaction { fill: none; stroke: #7c3aed; stroke-width: 2.2; stroke-dasharray: 7 5; marker-end: url(#dotted-arrow); }
+    </style>
+  </defs>
+  <rect width="1600" height="980" fill="#ffffff"/>
+  <text x="40" y="48" class="title">Library event storm</text>
+
+  <g transform="translate(40 72)">
+    <rect x="0" y="0" width="140" height="38" class="node actor"/>
+    <text x="70" y="25" text-anchor="middle" class="small">Actor</text>
+    <rect x="155" y="0" width="140" height="38" class="node command"/>
+    <text x="225" y="25" text-anchor="middle" class="small">Command</text>
+    <rect x="310" y="0" width="140" height="38" class="node event"/>
+    <text x="380" y="25" text-anchor="middle" class="small">Domain event</text>
+    <rect x="465" y="0" width="140" height="38" class="node policy"/>
+    <text x="535" y="25" text-anchor="middle" class="small">Policy</text>
+    <rect x="620" y="0" width="140" height="38" class="node read"/>
+    <text x="690" y="25" text-anchor="middle" class="small">Read model</text>
+    <rect x="775" y="0" width="140" height="38" class="node external"/>
+    <text x="845" y="25" text-anchor="middle" class="small">External system</text>
+    <rect x="930" y="0" width="140" height="38" class="node aggregate"/>
+    <text x="1000" y="25" text-anchor="middle" class="small">Aggregate boundary</text>
+  </g>
+
+  <rect x="24" y="132" width="1552" height="330" rx="16" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="48" y="164" class="lane">CATALOGING JOURNEY</text>
+
+  <rect x="48" y="191" width="126" height="48" class="node actor"/>
+  <text x="111" y="221" text-anchor="middle" class="label">Librarian</text>
+  <path d="M174 215 H203" class="flow"/>
+  <rect x="210" y="191" width="154" height="48" class="node command"/>
+  <text x="287" y="221" text-anchor="middle" class="label">Resolve title</text>
+  <path d="M364 215 H394" class="flow"/>
+  <rect x="402" y="183" width="205" height="64" class="node external"/>
+  <text x="504" y="210" text-anchor="middle" class="label">Bibliographic</text>
+  <text x="504" y="231" text-anchor="middle" class="label">service</text>
+  <path d="M607 210 H636" class="flow"/>
+  <rect x="644" y="183" width="160" height="48" class="node event"/>
+  <text x="724" y="213" text-anchor="middle" class="label">Title resolved</text>
+  <path d="M607 228 C620 260 627 274 644 274" class="flow"/>
+  <rect x="644" y="250" width="160" height="48" class="node event"/>
+  <text x="724" y="280" text-anchor="middle" class="label">Lookup failed</text>
+  <path d="M804 207 H842" class="flow"/>
+  <rect x="842" y="174" width="220" height="116" rx="14" class="aggregate"/>
+  <text x="952" y="197" text-anchor="middle" class="small">BOOK AGGREGATE</text>
+  <rect x="870" y="215" width="164" height="48" class="node command"/>
+  <text x="952" y="245" text-anchor="middle" class="label">Catalog book</text>
+  <path d="M1062 239 H1104" class="flow"/>
+  <rect x="1112" y="215" width="172" height="48" class="node event"/>
+  <text x="1198" y="245" text-anchor="middle" class="label">Book cataloged</text>
+  <path d="M1284 239 H1322" class="flow"/>
+  <rect x="1330" y="215" width="210" height="48" class="node read"/>
+  <text x="1435" y="245" text-anchor="middle" class="label">Catalog listing</text>
+  <rect x="183" y="334" width="126" height="48" class="node actor"/>
+  <text x="246" y="364" text-anchor="middle" class="label">Librarian</text>
+  <rect x="340" y="300" width="220" height="112" rx="14" class="aggregate"/>
+  <text x="450" y="324" text-anchor="middle" class="small">COPY AGGREGATE</text>
+  <rect x="355" y="334" width="160" height="48" class="node command"/>
+  <text x="435" y="364" text-anchor="middle" class="label">Register copy</text>
+  <path d="M309 358 H355" class="flow"/>
+  <path d="M560 358 H781" class="flow"/>
+  <rect x="789" y="334" width="190" height="48" class="node event"/>
+  <text x="884" y="364" text-anchor="middle" class="label">Copy registered</text>
+  <path d="M979 358 H1017" class="flow"/>
+  <rect x="1025" y="326" width="220" height="64" class="node read"/>
+  <text x="1135" y="353" text-anchor="middle" class="label">Shelf status</text>
+  <text x="1135" y="375" text-anchor="middle" class="small">Starts available</text>
+
+  <rect x="24" y="478" width="1552" height="474" rx="16" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="48" y="510" class="lane">LENDING JOURNEY AND POLICIES</text>
+
+  <rect x="48" y="548" width="126" height="48" class="node actor"/>
+  <text x="111" y="578" text-anchor="middle" class="label">Borrower</text>
+  <path d="M174 572 H206" class="flow"/>
+  <rect x="205" y="530" width="210" height="90" rx="14" class="aggregate"/>
+  <text x="310" y="546" text-anchor="middle" class="small">LOAN AGGREGATE</text>
+  <rect x="214" y="558" width="186" height="48" class="node command"/>
+  <text x="307" y="588" text-anchor="middle" class="label">Lend copy</text>
+  <path d="M415 582 H458" class="flow"/>
+  <rect x="466" y="558" width="174" height="48" class="node event"/>
+  <text x="553" y="588" text-anchor="middle" class="label">Loan opened</text>
+  <path d="M640 582 H674" class="flow"/>
+  <rect x="682" y="558" width="186" height="48" class="node read"/>
+  <text x="775" y="588" text-anchor="middle" class="label">Borrower's loans</text>
+  <path d="M553 606 V656 H903" class="reaction"/>
+  <rect x="682" y="630" width="206" height="58" class="node policy"/>
+  <text x="785" y="653" text-anchor="middle" class="small">When loan opens,</text>
+  <text x="785" y="674" text-anchor="middle" class="small">take copy off shelf</text>
+  <path d="M888 659 H926" class="reaction"/>
+  <rect x="918" y="616" width="227" height="88" rx="14" class="aggregate"/>
+  <text x="1031" y="632" text-anchor="middle" class="small">COPY AGGREGATE</text>
+  <rect x="934" y="646" width="195" height="48" class="node command"/>
+  <text x="1031" y="676" text-anchor="middle" class="label">Mark unavailable</text>
+  <path d="M1145 670 H1182" class="flow"/>
+  <rect x="1190" y="646" width="168" height="48" class="node event"/>
+  <text x="1274" y="676" text-anchor="middle" class="label">Copy off shelf</text>
+  <path d="M1358 670 H1392" class="flow"/>
+  <rect x="1400" y="646" width="140" height="48" class="node read"/>
+  <text x="1470" y="676" text-anchor="middle" class="label">Shelf status</text>
+
+  <rect x="48" y="770" width="126" height="48" class="node actor"/>
+  <text x="111" y="800" text-anchor="middle" class="label">Desk staff</text>
+  <rect x="205" y="738" width="210" height="96" rx="14" class="aggregate"/>
+  <text x="310" y="758" text-anchor="middle" class="small">LOAN AGGREGATE</text>
+  <rect x="218" y="772" width="184" height="48" class="node command"/>
+  <text x="310" y="802" text-anchor="middle" class="label">Return copy</text>
+  <path d="M174 794 H218" class="flow"/>
+  <path d="M415 796 H458" class="flow"/>
+  <rect x="466" y="772" width="174" height="48" class="node event"/>
+  <text x="553" y="802" text-anchor="middle" class="label">Loan closed</text>
+  <path d="M553 820 V866 H678" class="reaction"/>
+  <rect x="686" y="838" width="206" height="58" class="node policy"/>
+  <text x="789" y="861" text-anchor="middle" class="small">When loan closes,</text>
+  <text x="789" y="882" text-anchor="middle" class="small">put copy on shelf</text>
+  <path d="M892 867 H928" class="reaction"/>
+  <rect x="936" y="844" width="190" height="48" class="node command"/>
+  <text x="1031" y="874" text-anchor="middle" class="label">Mark available</text>
+  <path d="M1126 868 H1162" class="flow"/>
+  <rect x="1170" y="844" width="188" height="48" class="node event"/>
+  <text x="1264" y="874" text-anchor="middle" class="label">Copy on shelf</text>
+  <path d="M1358 868 H1392" class="flow"/>
+  <rect x="1400" y="844" width="140" height="48" class="node read"/>
+  <text x="1470" y="874" text-anchor="middle" class="label">Shelf status</text>
+
+  <path d="M553 820 V922 H678" class="reaction"/>
+  <rect x="686" y="904" width="206" height="38" class="node policy"/>
+  <text x="789" y="929" text-anchor="middle" class="small">If late, charge fee tier</text>
+  <path d="M892 923 H928" class="reaction"/>
+  <rect x="936" y="902" width="190" height="40" class="node command"/>
+  <text x="1031" y="928" text-anchor="middle" class="small">Assess overdue fee</text>
+  <path d="M1126 922 H1162" class="flow"/>
+  <rect x="1170" y="902" width="188" height="40" class="node event"/>
+  <text x="1264" y="928" text-anchor="middle" class="small">Overdue fee charged*</text>
+  <text x="950" y="970" class="small">* Identified in the storm; current code stores the fee but emits no fee event.</text>
+</svg>

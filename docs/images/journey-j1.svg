@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 402" role="img" aria-labelledby="title description">
+<title id="title">J1 · Catalog a book by ISBN</title>
+<desc id="description">Acceptance scenarios for cataloging a book using its ISBN.</desc>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#172033}.title{font-size:22px;font-weight:700;fill:#fff}.head{font-size:14px;font-weight:700;fill:#334155}.cell{font-size:15px}.grid{stroke:#cbd5e1;stroke-width:1}</style>
+<rect width="1480" height="402" fill="#fff"/>
+<rect x="0" y="0" width="1480" height="52" rx="9" fill="#1d4ed8"/>
+<text x="22" y="34" class="title">J1 · Catalog a book by ISBN</text>
+<rect x="0" y="52" width="1480" height="42" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="16" y="79" class="head">#</text>
+<text x="106" y="79" class="head">Scenario</text>
+<text x="576" y="79" class="head">What must happen</text>
+<rect x="0" y="94" width="1480" height="44" fill="#eff6ff"/>
+<text x="16" y="120" class="cell">1.1</text>
+<path d="M0 94 V138" class="grid"/>
+<text x="106" y="120" class="cell">The number typed is not a valid ISBN</text>
+<path d="M90 94 V138" class="grid"/>
+<text x="576" y="120" class="cell">Refused on the spot. Nothing is added; the librarian is told the number is wrong.</text>
+<path d="M560 94 V138" class="grid"/>
+<path d="M0 138 H1480" class="grid"/>
+<rect x="0" y="138" width="1480" height="44" fill="#fff"/>
+<text x="16" y="164" class="cell">1.2</text>
+<path d="M0 138 V182" class="grid"/>
+<text x="106" y="164" class="cell">The book is already in the catalog</text>
+<path d="M90 138 V182" class="grid"/>
+<text x="576" y="164" class="cell">Refused as a duplicate. The existing entry is untouched — no second record, no overwrite.</text>
+<path d="M560 138 V182" class="grid"/>
+<path d="M0 182 H1480" class="grid"/>
+<rect x="0" y="182" width="1480" height="44" fill="#eff6ff"/>
+<text x="16" y="208" class="cell">1.3</text>
+<path d="M0 182 V226" class="grid"/>
+<text x="106" y="208" class="cell">The ISBN is valid and new</text>
+<path d="M90 182 V226" class="grid"/>
+<text x="576" y="208" class="cell">The title is resolved from the bibliographic service and a new catalog entry is created.</text>
+<path d="M560 182 V226" class="grid"/>
+<path d="M0 226 H1480" class="grid"/>
+<rect x="0" y="226" width="1480" height="66" fill="#fff"/>
+<text x="16" y="252" class="cell">1.4</text>
+<path d="M0 226 V292" class="grid"/>
+<text x="106" y="252" class="cell">The bibliographic service has never heard of the ISBN</text>
+<path d="M90 226 V292" class="grid"/>
+<text x="576" y="252" class="cell">The librarian is told the book could not be found. Nothing is added — an entry with no title is worse than no</text>
+<text x="576" y="274" class="cell">entry.</text>
+<path d="M560 226 V292" class="grid"/>
+<path d="M0 292 H1480" class="grid"/>
+<rect x="0" y="292" width="1480" height="44" fill="#eff6ff"/>
+<text x="16" y="318" class="cell">1.5</text>
+<path d="M0 292 V336" class="grid"/>
+<text x="106" y="318" class="cell">The bibliographic service is failing</text>
+<path d="M90 292 V336" class="grid"/>
+<text x="576" y="318" class="cell">The librarian is told the lookup failed and may retry later. Nothing is added.</text>
+<path d="M560 292 V336" class="grid"/>
+<path d="M0 336 H1480" class="grid"/>
+<rect x="0" y="336" width="1480" height="44" fill="#fff"/>
+<text x="16" y="362" class="cell">1.6</text>
+<path d="M0 336 V380" class="grid"/>
+<text x="106" y="362" class="cell">The network is down</text>
+<path d="M90 336 V380" class="grid"/>
+<text x="576" y="362" class="cell">As 1.5.</text>
+<path d="M560 336 V380" class="grid"/>
+<path d="M0 380 H1480" class="grid"/>
+<rect x="0.75" y="52" width="1478.5" height="339" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+</svg>

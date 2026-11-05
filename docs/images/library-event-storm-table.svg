@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 1510" role="img" aria-labelledby="title description">
+  <title id="title">Library event-storm table</title>
+  <desc id="description">A color-coded table summarizing the library event storm. Orange domain-event rows list Book Cataloged, Copy Registered, Loan Opened, Loan Closed, Copy Off Shelf, Copy On Shelf, and an identified but unpublished Overdue Fee Charged event, with sources and consumers. Blue command rows list Catalog Book, Register Copy, Lend Copy, and Return Copy with their actors and deciding aggregates. Purple policy rows connect duplicate ISBNs and failed title lookup to refusal, loan opening and closing to shelf updates, and late loan closure to a fee. Green rows list the catalog, shelf-status, and borrower-loan read models. A pink row identifies the external Bibliographic Service and its Resolve Title command. Separate read-model projections are not implemented in the sample.</desc>
+  <defs>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+      .title { font-size: 30px; font-weight: 700; }
+      .section { font-size: 19px; font-weight: 700; fill: #ffffff; }
+      .head { font-size: 15px; font-weight: 700; fill: #334155; }
+      .cell { font-size: 16px; }
+      .note { font-size: 15px; fill: #475569; }
+      .grid { stroke: #cbd5e1; stroke-width: 1; }
+      .evtHead { fill: #c2410c; }
+      .evtRow { fill: #fff7ed; }
+      .cmdHead { fill: #1d4ed8; }
+      .cmdRow { fill: #eff6ff; }
+      .polHead { fill: #7e22ce; }
+      .polRow { fill: #faf5ff; }
+      .readHead { fill: #15803d; }
+      .readRow { fill: #f0fdf4; }
+      .extHead { fill: #be185d; }
+      .extRow { fill: #fdf2f8; }
+      .tableBorder { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+      .tableOutline { fill: none; stroke: #cbd5e1; stroke-width: 1.5; }
+    </style>
+  </defs>
+  <rect width="1500" height="1510" fill="#ffffff"/>
+  <text x="40" y="46" class="title">The library event storm, tabulated</text>
+
+  <g aria-label="Domain events">
+    <rect x="30" y="68" width="1440" height="42" rx="8" class="evtHead"/>
+    <text x="50" y="96" class="section">DOMAIN EVENTS · What happened</text>
+    <rect x="30" y="110" width="1440" height="36" class="tableBorder"/>
+    <text x="48" y="134" class="head">Event</text>
+    <text x="390" y="134" class="head">Raised by</text>
+    <text x="650" y="134" class="head">Consumers / notes</text>
+    <path d="M370 110 V482 M630 110 V482" class="grid"/>
+    <g class="grid">
+      <path d="M30 146 H1470 M30 194 H1470 M30 242 H1470 M30 290 H1470 M30 338 H1470 M30 386 H1470 M30 434 H1470 M30 482 H1470"/>
+    </g>
+    <g class="evtRow">
+      <rect x="31" y="147" width="1438" height="47"/>
+      <rect x="31" y="195" width="1438" height="47"/>
+      <rect x="31" y="243" width="1438" height="47"/>
+      <rect x="31" y="291" width="1438" height="47"/>
+      <rect x="31" y="339" width="1438" height="47"/>
+      <rect x="31" y="387" width="1438" height="47"/>
+      <rect x="31" y="435" width="1438" height="47"/>
+    </g>
+    <path d="M370 110 V482 M630 110 V482 M30 146 H1470 M30 194 H1470 M30 242 H1470 M30 290 H1470 M30 338 H1470 M30 386 H1470 M30 434 H1470 M30 482 H1470" class="grid"/>
+    <g class="cell">
+      <text x="48" y="177">Book Cataloged</text><text x="390" y="177">Book</text><text x="650" y="177">Cataloging staff; catalog listing</text>
+      <text x="48" y="225">Copy Registered</text><text x="390" y="225">Copy</text><text x="650" y="225">Shelf status</text>
+      <text x="48" y="273">Loan Opened</text><text x="390" y="273">Loan</text><text x="650" y="273">Borrower; shelf</text>
+      <text x="48" y="321">Loan Closed</text><text x="390" y="321">Loan</text><text x="650" y="321">Desk staff; shelf; billing</text>
+      <text x="48" y="369">Copy Off Shelf</text><text x="390" y="369">Copy</text><text x="650" y="369">Anyone checking availability</text>
+      <text x="48" y="417">Copy On Shelf</text><text x="390" y="417">Copy</text><text x="650" y="417">Anyone checking availability</text>
+      <text x="48" y="465">Overdue Fee Charged</text><text x="390" y="465">Loan</text><text x="650" y="465">Billing · identified, but not emitted by the code</text>
+    </g>
+    <rect x="30" y="110" width="1440" height="372" class="tableOutline"/>
+  </g>
+
+  <g aria-label="Commands">
+    <rect x="30" y="526" width="1440" height="42" rx="8" class="cmdHead"/>
+    <text x="50" y="554" class="section">COMMANDS · What an actor asks to happen</text>
+    <rect x="30" y="568" width="1440" height="34" class="tableBorder"/>
+    <text x="48" y="591" class="head">Command</text><text x="650" y="591" class="head">Actor</text><text x="970" y="591" class="head">Deciding aggregate</text>
+    <g class="cmdRow">
+      <rect x="31" y="603" width="1438" height="42"/><rect x="31" y="646" width="1438" height="42"/>
+      <rect x="31" y="689" width="1438" height="42"/><rect x="31" y="732" width="1438" height="41"/>
+    </g>
+    <path d="M630 568 V774 M950 568 V774 M30 602 H1470 M30 645 H1470 M30 688 H1470 M30 731 H1470 M30 774 H1470" class="grid"/>
+    <g class="grid"><path d="M30 602 H1470 M30 645 H1470 M30 688 H1470 M30 731 H1470 M30 774 H1470"/></g>
+    <g class="cell">
+      <text x="48" y="631">Catalog Book</text><text x="650" y="631">Librarian</text><text x="970" y="631">Book</text>
+      <text x="48" y="674">Register Copy</text><text x="650" y="674">Librarian</text><text x="970" y="674">Copy</text>
+      <text x="48" y="717">Lend Copy</text><text x="650" y="717">Borrower</text><text x="970" y="717">Loan</text>
+      <text x="48" y="760">Return Copy</text><text x="650" y="760">Desk staff</text><text x="970" y="760">Loan</text>
+    </g>
+    <rect x="30" y="568" width="1440" height="206" class="tableOutline"/>
+  </g>
+
+  <g aria-label="Policies">
+    <rect x="30" y="794" width="1440" height="42" rx="8" class="polHead"/>
+    <text x="50" y="822" class="section">POLICIES · Automatic reactions</text>
+    <rect x="30" y="836" width="1440" height="34" class="tableBorder"/>
+    <text x="48" y="859" class="head">When</text><text x="650" y="859" class="head">Then</text>
+    <g class="polRow">
+      <rect x="31" y="871" width="1438" height="46"/><rect x="31" y="918" width="1438" height="46"/>
+      <rect x="31" y="965" width="1438" height="46"/><rect x="31" y="1012" width="1438" height="46"/>
+      <rect x="31" y="1059" width="1438" height="47"/>
+    </g>
+    <g class="grid"><path d="M30 870 H1470 M30 917 H1470 M30 964 H1470 M30 1011 H1470 M30 1058 H1470 M30 1107 H1470"/></g>
+    <g class="cell">
+      <text x="48" y="900">A book is cataloged with an ISBN already in the catalog</text><text x="650" y="900">Refuse; change nothing</text>
+      <text x="48" y="947">A title cannot be resolved</text><text x="650" y="947">Refuse; leave the catalog untouched</text>
+      <text x="48" y="994">A loan opens</text><text x="650" y="994">Take that copy off the shelf</text>
+      <text x="48" y="1041">A loan closes</text><text x="650" y="1041">Put that copy back on the shelf</text>
+      <text x="48" y="1088">A loan closes after its due date</text><text x="650" y="1088">Charge the matching fee tier</text>
+    </g>
+    <path d="M630 836 V1107 M30 870 H1470 M30 917 H1470 M30 964 H1470 M30 1011 H1470 M30 1058 H1470 M30 1107 H1470" class="grid"/>
+    <rect x="30" y="836" width="1440" height="271" class="tableOutline"/>
+  </g>
+
+  <g aria-label="Read models">
+    <rect x="30" y="1127" width="1440" height="42" rx="8" class="readHead"/>
+    <text x="50" y="1155" class="section">READ MODELS · Information people look up</text>
+    <rect x="30" y="1169" width="1440" height="34" class="tableBorder"/>
+    <text x="48" y="1192" class="head">View</text><text x="650" y="1192" class="head">Who uses it</text><text x="970" y="1192" class="head">Implementation note</text>
+    <path d="M630 1169 V1335 M950 1169 V1335" class="grid"/>
+    <g class="readRow">
+      <rect x="31" y="1204" width="1438" height="42"/><rect x="31" y="1247" width="1438" height="42"/>
+      <rect x="31" y="1290" width="1438" height="44"/>
+    </g>
+    <path d="M630 1169 V1335 M950 1169 V1335 M30 1203 H1470 M30 1246 H1470 M30 1289 H1470 M30 1335 H1470" class="grid"/>
+    <g class="cell">
+      <text x="48" y="1232">Catalog listing</text><text x="650" y="1232">Catalog users</text><text x="970" y="1232">Query/view; no separate projection in this sample</text>
+      <text x="48" y="1275">Shelf status</text><text x="650" y="1275">Anyone checking availability</text><text x="970" y="1275">Updated by the in-process event listener</text>
+      <text x="48" y="1318">Borrower's loans</text><text x="650" y="1318">Borrower</text><text x="970" y="1318">Query/view; no separate projection in this sample</text>
+    </g>
+    <rect x="30" y="1169" width="1440" height="166" class="tableOutline"/>
+  </g>
+
+  <g aria-label="External system">
+    <rect x="30" y="1355" width="1440" height="42" rx="8" class="extHead"/>
+    <text x="50" y="1383" class="section">EXTERNAL SYSTEM · Outside the library's control</text>
+    <rect x="30" y="1397" width="1440" height="64" rx="8" class="extRow" stroke="#cbd5e1"/>
+    <text x="48" y="1424" class="cell" font-weight="700">Bibliographic Service</text>
+    <text x="340" y="1424" class="cell">Called by the Resolve Title command</text>
+    <text x="340" y="1447" class="note">Cataloging owns the integration boundary; the service supplies bibliographic information for an ISBN.</text>
+  </g>
+</svg>

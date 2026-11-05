@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1480 336" role="img" aria-labelledby="title description">
+<title id="title">J5 · The overdue fee</title>
+<desc id="description">Flat overdue-fee tiers based on how many days late a copy is returned.</desc>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#172033}.title{font-size:22px;font-weight:700;fill:#fff}.head{font-size:14px;font-weight:700;fill:#334155}.cell{font-size:15px}.grid{stroke:#cbd5e1;stroke-width:1}</style>
+<rect width="1480" height="336" fill="#fff"/>
+<rect x="0" y="0" width="1480" height="52" rx="9" fill="#7e22ce"/>
+<text x="22" y="34" class="title">J5 · The overdue fee</text>
+<rect x="0" y="52" width="1480" height="42" fill="#f1f5f9" stroke="#cbd5e1"/>
+<text x="16" y="79" class="head">Days late</text>
+<text x="1096" y="79" class="head">Fee</text>
+<rect x="0" y="94" width="1480" height="44" fill="#faf5ff"/>
+<text x="16" y="120" class="cell">Not late</text>
+<path d="M0 94 V138" class="grid"/>
+<text x="1096" y="120" class="cell">—</text>
+<path d="M1080 94 V138" class="grid"/>
+<path d="M0 138 H1480" class="grid"/>
+<rect x="0" y="138" width="1480" height="44" fill="#fff"/>
+<text x="16" y="164" class="cell">1–7</text>
+<path d="M0 138 V182" class="grid"/>
+<text x="1096" y="164" class="cell">5.00</text>
+<path d="M1080 138 V182" class="grid"/>
+<path d="M0 182 H1480" class="grid"/>
+<rect x="0" y="182" width="1480" height="44" fill="#faf5ff"/>
+<text x="16" y="208" class="cell">8–14</text>
+<path d="M0 182 V226" class="grid"/>
+<text x="1096" y="208" class="cell">10.00</text>
+<path d="M1080 182 V226" class="grid"/>
+<path d="M0 226 H1480" class="grid"/>
+<rect x="0" y="226" width="1480" height="44" fill="#fff"/>
+<text x="16" y="252" class="cell">15–30</text>
+<path d="M0 226 V270" class="grid"/>
+<text x="1096" y="252" class="cell">20.00</text>
+<path d="M1080 226 V270" class="grid"/>
+<path d="M0 270 H1480" class="grid"/>
+<rect x="0" y="270" width="1480" height="44" fill="#faf5ff"/>
+<text x="16" y="296" class="cell">More than 30</text>
+<path d="M0 270 V314" class="grid"/>
+<text x="1096" y="296" class="cell">50.00</text>
+<path d="M1080 270 V314" class="grid"/>
+<path d="M0 314 H1480" class="grid"/>
+<rect x="0.75" y="52" width="1478.5" height="273" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+</svg>
