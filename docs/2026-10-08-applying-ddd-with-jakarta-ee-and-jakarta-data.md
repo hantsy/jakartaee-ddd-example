@@ -88,7 +88,7 @@ The diagram uses common event-storming conventions associated with Alberto
 Brandolini. Commands represent requests, events record what happened, and
 policies connect events to follow-up commands.
 
-![Event-storming diagram of the library's cataloging and lending journeys, with actors, commands, domain events, aggregates, policies, read models, and the external bibliographic service.](images/library-event-storm.svg)
+![Event-storming diagram of the library's cataloging and lending journeys, with actors, commands, domain events, aggregates, policies, read models, and the external bibliographic service.](images/library-event-storm.png)
 
 The overdue-fee event is identified in the requirements, but the current code
 stores the fee on the loan without publishing an event.
@@ -99,7 +99,7 @@ The color-coded table summarizes the events, commands, policies, read models,
 and external system in the storm. The colors match the event-storm diagram
 above.
 
-![Color-coded event-storm table listing the library's domain events and consumers, commands and actors, policies and reactions, read models and implementation notes, and the external Bibliographic Service.](images/library-event-storm-table.svg)
+![Color-coded event-storm table listing the library's domain events and consumers, commands and actors, policies and reactions, read models and implementation notes, and the external Bibliographic Service.](images/library-event-storm-table.png)
 
 The overdue-fee event is identified in the requirements but isn't published by
 the current code. The listed read models describe information users need; the
@@ -112,14 +112,14 @@ Part III.
 
 #### J1 — Catalog a book by ISBN
 
-![J1 acceptance scenarios for cataloging a book by ISBN, including invalid or duplicate ISBNs, successful title resolution, unknown ISBNs, service failures, and network failures.](images/journey-j1.svg)
+![J1 acceptance scenarios for cataloging a book by ISBN, including invalid or duplicate ISBNs, successful title resolution, unknown ISBNs, service failures, and network failures.](images/journey-j1.png)
 
 **Business rule.** Cataloging a book is all-or-nothing. If the title cannot be
 resolved, no partial entry is left behind for someone to clean up later.
 
 #### J2 — Register a physical copy
 
-![J2 acceptance scenarios for registering a physical copy, including successful registration and missing book or barcode.](images/journey-j2.svg)
+![J2 acceptance scenarios for registering a physical copy, including successful registration and missing book or barcode.](images/journey-j2.png)
 
 **Business rule.** A copy can only be registered against a book that is already
 in the catalog. *Whether the system enforces this is a separate question — see
@@ -127,7 +127,7 @@ Part III.*
 
 #### J3 — Lend a copy
 
-![J3 acceptance scenarios for lending a copy, including available copies, already-loaned copies, and two borrowers attempting to borrow the same copy concurrently.](images/journey-j3.svg)
+![J3 acceptance scenarios for lending a copy, including available copies, already-loaned copies, and two borrowers attempting to borrow the same copy concurrently.](images/journey-j3.png)
 
 **Business rules.** A copy is on at most one open loan at a time. The due date is
 always thirty days out. Lending is atomic — either the loan exists *and* the copy
@@ -135,13 +135,13 @@ is off the shelf, or neither is true.
 
 #### J4 — Return a copy
 
-![J4 acceptance scenarios for returning copies, including successful return, unknown loans, on-time returns, and late returns.](images/journey-j4.svg)
+![J4 acceptance scenarios for returning copies, including successful return, unknown loans, on-time returns, and late returns.](images/journey-j4.png)
 
 #### J5 — The overdue fee
 
 The library charges a flat fee based on the number of days a copy is overdue:
 
-![J5 overdue-fee tiers: no fee when not late, then flat fees of 5.00 for 1–7 days, 10.00 for 8–14 days, 20.00 for 15–30 days, and 50.00 for more than 30 days late.](images/overdue-fees.svg)
+![J5 overdue-fee tiers: no fee when not late, then flat fees of 5.00 for 1–7 days, 10.00 for 8–14 days, 20.00 for 15–30 days, and 50.00 for more than 30 days late.](images/overdue-fees.png)
 
 **Business rules.** The fee is a flat tier amount, not a per-day accrual. It is
 decided once, at the moment of return. It belongs to the loan — not to the copy,
@@ -173,14 +173,14 @@ These classifications depend on the organization. For this example, assume the
 library treats lending as its core subdomain, cataloging as supporting, and
 bibliographic lookup as generic:
 
-![Subdomain classification: lending is core, cataloging is supporting, and bibliographic lookup is generic, with each rationale and design consequence.](images/subdomains.svg)
+![Subdomain classification: lending is core, cataloging is supporting, and bibliographic lookup is generic, with each rationale and design consequence.](images/subdomains.png)
 
 The diagram separates the business subdomains from the software model boundaries.
 In this example, the subdomains don't map one-to-one to bounded contexts:
 cataloging owns the port to the external bibliographic service, so lookup has no
 separate context.
 
-![Diagram showing lending as the core subdomain, cataloging as supporting, and bibliographic lookup as generic. The application has lending and cataloging bounded contexts; cataloging connects through a port and adapter to an external bibliographic service.](images/library-domain-boundaries.svg)
+![Diagram showing lending as the core subdomain, cataloging as supporting, and bibliographic lookup as generic. The application has lending and cataloging bounded contexts; cataloging connects through a port and adapter to an external bibliographic service.](images/library-domain-boundaries.png)
 
 This classification helps prioritize design effort. Lending has the most
 business-specific policies in this example, so the model focuses on loan
@@ -202,7 +202,7 @@ owns the interface to the external provider.
 The team uses the following terms consistently in its conversations,
 requirements, and code:
 
-![Ubiquitous language glossary defining Book, Title, ISBN, Copy, Barcode, Shelf status, Borrower, Loan, Due date, Return, Overdue, Overdue fee, and Catalog.](images/ubiquitous-language.svg)
+![Ubiquitous language glossary defining Book, Title, ISBN, Copy, Barcode, Shelf status, Borrower, Loan, Due date, Return, Overdue, Overdue fee, and Catalog.](images/ubiquitous-language.png)
 
 The model distinguishes a catalog record from each physical item:
 **a book isn't a copy.** A library can hold one catalog record for
@@ -306,12 +306,12 @@ patterns; Jakarta Data provides the repository API used in this sample.
 
 The following image maps the design choices from Part I to their implementation:
 
-![Strategic commitments mapped to code and mechanisms, including context-specific identifiers, event coupling, replaceable lookup, and architecture rules.](images/strategic-commitments.svg)
+![Strategic commitments mapped to code and mechanisms, including context-specific identifiers, event coupling, replaceable lookup, and architecture rules.](images/strategic-commitments.png)
 
 The tactical building blocks and their Jakarta EE mechanisms are summarized
 here:
 
-![Tactical building blocks used in the sample and corresponding Jakarta EE mechanisms, including entities, value objects, repositories, events, services, transactions, adapters, and configuration.](images/tactical-building-blocks.svg)
+![Tactical building blocks used in the sample and corresponding Jakarta EE mechanisms, including entities, value objects, repositories, events, services, transactions, adapters, and configuration.](images/tactical-building-blocks.png)
 
 The building blocks in the second image each get a section in Part II.
 
@@ -373,7 +373,7 @@ as allowing only one open loan per copy.
 
 #### Invariants and their guards
 
-![Invariants, the code that guards them, and current enforcement status, including duplicate ISBN checks, book-copy association, concurrent rentals, due dates, fees, and shelf status.](images/invariants.svg)
+![Invariants, the code that guards them, and current enforcement status, including duplicate ISBN checks, book-copy association, concurrent rentals, due dates, fees, and shelf status.](images/invariants.png)
 
 The image distinguishes checks the current implementation performs from a
 requirement it doesn't enforce. The availability check prevents a second loan
@@ -925,7 +925,7 @@ layer.
 
 The package tree also shows the shared technical package:
 
-![Library package tree showing shared technical types, catalog application/domain/infrastructure packages, and lending application/domain packages, including representative classes.](images/package-structure.svg)
+![Library package tree showing shared technical types, catalog application/domain/infrastructure packages, and lending application/domain packages, including representative classes.](images/package-structure.png)
 
 The lending context has no infrastructure package in this sample. Its repository
 interface is implemented by the Jakarta Data runtime; the application still
@@ -936,7 +936,7 @@ Packages don't enforce module boundaries by themselves. Eight ArchUnit rules run
 as unit tests during `mvn package` and fail the build when a dependency rule is
 violated:
 
-![Eight ArchUnit rules and the architecture constraints they enforce, including layer direction, framework independence, context isolation, and repository placement.](images/archunit-rules.svg)
+![Eight ArchUnit rules and the architecture constraints they enforce, including layer direction, framework independence, context isolation, and repository placement.](images/archunit-rules.png)
 
 Rule 7 documents the event-listener exception:
 
