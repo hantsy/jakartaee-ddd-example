@@ -915,7 +915,15 @@ network — which is what the WireMock tests exploit in Part III.
 
 ### 5. Packages and ArchUnit rules
 
-The two bounded contexts and shared technical package map to this package tree:
+Eric Evans describes a four-layer architecture: user interface, application,
+domain, and infrastructure. This example applies that organization inside each
+bounded context rather than creating one set of layers for the whole application.
+The cataloging and lending contexts each have application and domain packages;
+infrastructure appears where an adapter is needed. The generic bibliographic
+lookup subdomain has no separate context, and this example has no user-interface
+layer.
+
+The package tree also shows the shared technical package:
 
 ![Library package tree showing shared technical types, catalog application/domain/infrastructure packages, and lending application/domain packages, including representative classes.](images/package-structure.svg)
 
@@ -1008,5 +1016,8 @@ Source code: [hantsy/jakartaee-ddd-example](https://github.com/hantsy/jakartaee-
   by Martin Fowler provides an overview of DDD concepts.
 - [An Introduction to Domain-Driven Design](https://www.dddcommunity.org/learning-ddd/haywood_2010/)
   by Dan Haywood is an introductory article listed by the DDD Community.
+- [*Domain-Driven Design: Tackling Complexity in the Heart of Software*](https://www.amazon.com/dp/0321125215)
+  by Eric Evans (Addison-Wesley, 2003) introduced many of the patterns used in
+  this article.
 - [DDD Reference](https://www.domainlanguage.com/ddd/reference/) by Eric Evans
   is a concise pattern reference for readers who already know the basics.
